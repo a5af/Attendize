@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Attendize\Utils;
 use App\Models\Account;
 use App\Models\User;
+use App\Models\Role;
 use Hash;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Request;
@@ -42,7 +43,7 @@ class UserSignupController extends Controller
         $is_attendize = Utils::isAttendize();
         $this->validate($request, [
             'email'        => 'required|email|unique:users',
-            'password'     => 'required|min:8|confirmed',
+            'password'     => 'required|min:5|confirmed',
             'first_name'   => 'required',
             'terms_agreed' => $is_attendize ? 'required' : '',
         ]);
@@ -60,13 +61,16 @@ class UserSignupController extends Controller
         $user_data['is_registered'] = 1;
         $user = User::create($user_data);
 
+        $ownerRole = Role::where('name', 'owner')->first();
+        $user->attachRole($ownerRole);
+
         if ($is_attendize) {
             // TODO: Do this async?
             Mail::send('Emails.ConfirmEmail',
                 ['first_name' => $user->first_name, 'confirmation_code' => $user->confirmation_code],
                 function ($message) use ($request) {
                     $message->to($request->get('email'), $request->get('first_name'))
-                        ->subject(trans("Email.attendize_register"));
+                        ->subject('Thank you for registering for Attendize');
                 });
         }
 
@@ -87,7 +91,7 @@ class UserSignupController extends Controller
 
         if (!$user) {
             return view('Public.Errors.Generic', [
-                'message' => trans("Controllers.confirmation_malformed"),
+                'message' => 'The confirmation code is missing or malformed.',
             ]);
         }
 
@@ -95,7 +99,7 @@ class UserSignupController extends Controller
         $user->confirmation_code = null;
         $user->save();
 
-        session()->flash('message', trans("Controllers.confirmation_successful"));
+        session()->flash('message', 'Success! Your email is now verified. You can now login.');
 
         return redirect()->route('login');
     }

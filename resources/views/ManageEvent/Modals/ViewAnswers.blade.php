@@ -4,7 +4,7 @@
             <div class="modal-header text-center">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h3 class="modal-title">
-                   @lang("Question.Q"): {{ $question->title }}
+                   Q: {{ $question->title }}
                 </h3>
             </div>
 
@@ -14,13 +14,13 @@
                                <thead>
                                <tr>
                                    <th>
-                                       @lang("Question.attendee_details")
+                                       Attendee Details
                                    </th>
                                    <th>
-                                       @lang("ManageEvent.ticket")
+                                       Ticket
                                    </th>
                                    <th>
-                                       @lang("Question.answer")
+                                       Answer
                                    </th>
                                </tr>
 
@@ -32,9 +32,9 @@
 
                                            {{ $answer->attendee->full_name }}
                                            @if($answer->attendee->is_cancelled)
-                                               (<span title="@lang("ManageEvent.attendee_cancelled_help")" class="text-danger">@lang("ManageEvent.attendee_cancelled")</span>)
+                                               (<span title="This attendee has been cancelled" class="text-danger">Cancelled</span>)
                                            @endif<br>
-                                           <a title="@lang("ManageEvent.go_to_attendee_name", ["name"=>$answer->attendee->full_name])" href="{{route('showEventAttendees', ['event_id' => $answer->attendee->event_id, 'q' => $answer->attendee->reference])}}">{{ $answer->attendee->email }}</a><br>
+                                           <a title="Go to attendee: {{ $answer->attendee->full_name }}" href="{{route('showEventAttendees', ['event_id' => $answer->attendee->event_id, 'q' => $answer->attendee->reference])}}">{{ $answer->attendee->email }}</a><br>
 
                                        </td>
                                        <td>
@@ -52,14 +52,14 @@
             @else
                 <div class="modal-body">
                     <div class="alert alert-info">
-                        @lang("Question.no_answers")
+                        Sorry, there are no answers to this question yet.
                     </div>
                 </div>
 
             @endif
 
             <div class="modal-footer">
-                {!! Form::button(trans("ManageEvent.close"), ['class'=>"btn modal-close btn-danger",'data-dismiss'=>'modal']) !!}
+                {!! Form::button('Close', ['class'=>"btn modal-close btn-danger",'data-dismiss'=>'modal']) !!}
             </div>
         </div><!-- /end modal content-->
     </div>

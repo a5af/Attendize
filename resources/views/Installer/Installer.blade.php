@@ -1,7 +1,7 @@
 @extends('Shared.Layouts.MasterWithoutMenus')
 
 @section('title')
-    @lang("Installer.title")
+    Attendize Web Installer
 @stop
 
 @section('head')
@@ -28,69 +28,61 @@
                         {!!HTML::image('assets/images/logo-dark.png')!!}
                     </div>
 
-                    <h1>@lang("Installer.setup")</h1>
-                    @if (count($errors) > 0)
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                    @endif
+                    <h1>Attendize Setup</h1>
 
-                    <h3>@lang("Installer.php_version_check")</h3>
-                    @if (version_compare(phpversion(), '7.1.3', '<'))
+
+                    <h3>PHP Version Check</h3>
+                    @if (version_compare(phpversion(), '5.5.9', '<'))
                         <div class="alert alert-warning">
-                            {!! @trans("Installer.php_too_low", ["requires"=>"7.1.3", "has"=>phpversion()]) !!}
+                            Warning: The application requires PHP >= <b>5.5.9.</b> Your version is <b>{{phpversion()}}</b>
                         </div>
                     @else
                         <div class="alert alert-success">
-                            {!! @trans("Installer.php_enough", ["requires"=>"7.1.3", "has"=>phpversion()]) !!}
+                            Success: The application requires PHP >= <b>5.5.9.</b> and yours is <b>{{phpversion()}}</b>
                         </div>
                     @endif
 
-                    <h3>@lang("Installer.files_n_folders_check")</h3>
+                    <h3>Files &amp; Folders Check</h3>
                     @foreach($paths as $path)
 
                         @if(!File::isWritable($path))
                             <div class="alert alert-danger">
-                            {!! @trans("Installer.path_not_writable", ["path"=>$path]) !!}
+                                Warning: <b>{{$path}}</b> is not writable
                             </div>
                         @else
                             <div class="alert alert-success">
-                            {!! @trans("Installer.path_writable", ["path"=> $path]) !!}
+                                Success: <b>{{$path}}</b> is writable
                             </div>
                         @endif
 
                     @endforeach
 
-                    <h3>@lang("Installer.php_requirements_check")</h3>
+                    <h3>PHP Requirements Check</h3>
                     @foreach($requirements as $requirement)
 
                         @if(!extension_loaded($requirement))
                             <div class="alert alert-danger">
-                                {!! @trans("Installer.requirement_not_met", ["requirement"=>$requirement]) !!}
+                                Error: <b>{{$requirement}}</b> extension is not loaded
                             </div>
                         @else
                             <div class="alert alert-success">
-                                {!! @trans("Installer.requirement_met", ["requirement"=>$requirement]) !!}
+                                Success: <b>{{$requirement}}</b> extension is loaded
                             </div>
                         @endif
 
                     @endforeach
 
-                    <h3>@lang("Installer.php_optional_requirements_check")</h3>
+                    <h3>PHP Optional Requirements Check</h3>
 
                     @foreach($optional_requirements as $optional_requirement)
 
                         @if(!extension_loaded($optional_requirement))
                             <div class="alert alert-warning">
-                                {!! @trans("Installer.optional_requirement_not_met", ["requirement"=>$optional_requirement]) !!}
+                                Warning: <b>{{$optional_requirement}}</b> extension is not loaded
                             </div>
                         @else
                             <div class="alert alert-success">
-                                {!! @trans("Installer.requirement_met", ["requirement"=>$optional_requirement]) !!}
+                                Success: <b>{{$optional_requirement}}</b> extension is loaded
                             </div>
                         @endif
 
@@ -98,10 +90,10 @@
 
                     {!! Form::open(array('url' => route('postInstaller'), 'class' => 'installer_form')) !!}
 
-                    <h3>@lang("Installer.app_settings")</h3>
+                    <h3>App Settings</h3>
 
                     <div class="form-group">
-                        {!! Form::label('app_url', trans("Installer.application_url"), array('class'=>'required control-label ')) !!}
+                        {!! Form::label('app_url', 'Application URL', array('class'=>'required control-label ')) !!}
                         {!!  Form::text('app_url', Input::old('app_url'),
                                     array(
                                     'class'=>'form-control',
@@ -109,14 +101,13 @@
                                     ))  !!}
                     </div>
 
-                    <h3>@lang("Installer.database_settings")</h3>
-                    <p>@lang("Installer.database_message")</p>
+                    <h3>Database Settings</h3>
 
                     <div class="form-group">
-                        {!! Form::label('database_type', trans("Installer.database_type"), array('class'=>'required control-label ')) !!}
+                        {!! Form::label('database_type', 'Database Type', array('class'=>'required control-label ')) !!}
                         {!!  Form::select('database_type', array(
-                                  'mysql' => "MySQL",
                                   'pgsql' => "Postgres",
+                                  'mysql' => "MySQL",
                                     ), Input::old('database_type'),
                                     array(
                                     'class'=>'form-control'
@@ -124,34 +115,33 @@
                     </div>
 
                     <div class="form-group">
-                        {!! Form::label('database_host', trans("Installer.database_host"), array('class'=>'control-label required')) !!}
-                        {!!  Form::text('database_host', $value = env("DB_HOST") ,
+                        {!! Form::label('database_host', 'Database Host', array('class'=>'control-label required')) !!}
+                        {!!  Form::text('database_host', Input::old('database_host'),
                                     array(
                                     'class'=>'form-control ',
                                     'placeholder'=>''
                                     ))  !!}
-
-
                     </div>
+
                     <div class="form-group">
-                        {!! Form::label('database_name', trans("Installer.database_name"), array('class'=>'required control-label required')) !!}
-                        {!!  Form::text('database_name', $value = env("DB_DATABASE") ,
+                        {!! Form::label('database_name', 'Database Name', array('class'=>'required control-label ')) !!}
+                        {!!  Form::text('database_name', Input::old('database_name'),
                                     array(
                                     'class'=>'form-control'
                                     ))  !!}
                     </div>
 
                     <div class="form-group">
-                        {!! Form::label('database_username', trans("Installer.database_username"), array('class'=>'control-label required')) !!}
-                        {!!  Form::text('database_username', $value = env("DB_USERNAME"),
+                        {!! Form::label('database_username', 'Database Username', array('class'=>'control-label required')) !!}
+                        {!!  Form::text('database_username', Input::old('database_username'),
                                     array(
                                     'class'=>'form-control ',
                                     'placeholder'=>'',
                                     ))  !!}
                     </div>
                     <div class="form-group">
-                        {!! Form::label('database_password', trans("Installer.database_password"), array('class'=>'control-label required')) !!}
-                        {!!  Form::text('database_password', $value = env("DB_PASSWORD"),
+                        {!! Form::label('database_password', 'Database Password', array('class'=>'control-label ')) !!}
+                        {!!  Form::text('database_password', Input::old('database_password'),
                                     array(
                                     'class'=>'form-control ',
                                     'placeholder'=>'',
@@ -173,14 +163,14 @@
 
                                     $.post(url, $(".installer_form").serialize(), function (data) {
                                         if (data.status === 'success') {
-                                            alert('@lang("Installer.database_test_connect_success")');
+                                            alert('Success! Database settings are working!');
                                         } else {
-                                            alert('@lang("Installer.database_test_connect_failure")');
+                                            alert('Unable to connect. Please check your settings.')
                                         }
                                     }, 'json').fail(function (data) {
                                         var returned = $.parseJSON(data.responseText);
                                         console.log(returned.error);
-                                        alert('@lang("Installer.database_test_connect_failure_message")\n\n' + '@lang("Installer.database_test_connect_failure_error_type"): ' + returned.error.type + '\n' + '@lang("Installer.database_test_connect_failure_error_message"): ' + returned.error.message);
+                                        alert('Unable to connect. Please check your settings.\n\n' + 'Error Type: ' + returned.error.type + '\n' + 'Error Message: ' + returned.error.message);
                                     });
 
                                     e.preventDefault();
@@ -188,78 +178,94 @@
                             });
                         </script>
                         <a href="{{route('postInstaller',['test' => 'db'])}}" class="test_db">
-                            @lang("Installer.test_database_connection")
+                            Test Database Connection
                         </a>
                     </div>
 
-                    <h3>@lang("Installer.email_settings")</h3>
+                    <h3>Email Settings</h3>
 
                     <div class="form-group">
-                        {!! Form::label('mail_from_address', trans("Installer.mail_from_address"), array('class'=>' control-label required')) !!}
-                        {!!  Form::text('mail_from_address', $value = env("MAIL_FROM_ADDRESS") ,
+                        {!! Form::label('mail_from_address', 'Mail From Address', array('class'=>' control-label required')) !!}
+                        {!!  Form::text('mail_from_address', Input::old('mail_from_address'),
                                     array(
                                     'class'=>'form-control'
                                     ))  !!}
                     </div>
                     <div class="form-group">
-                        {!! Form::label('mail_from_name', trans("Installer.mail_from_name"), array('class'=>' control-label required')) !!}
-                        {!!  Form::text('mail_from_name', $value = env("MAIL_FROM_NAME") ,
+                        {!! Form::label('mail_from_name', 'Mail From Name', array('class'=>' control-label required')) !!}
+                        {!!  Form::text('mail_from_name', Input::old('mail_from_name'),
                                     array(
                                     'class'=>'form-control'
                                     ))  !!}
                     </div>
                     <div class="form-group">
-                        {!! Form::label('mail_driver', trans("Installer.mail_from_address"), array('class'=>' control-label required')) !!}
-                        {!!  Form::text('mail_driver', $value = env("MAIL_DRIVER"),
+                        {!! Form::label('mail_driver', 'Mail Driver', array('class'=>' control-label required')) !!}
+                        {!!  Form::text('mail_driver', Input::old('mail_driver'),
                                     array(
                                     'class'=>'form-control ',
                                     'placeholder' => 'mail'
                                     ))  !!}
                         <div class="help-block">
-                           {!! @trans("Installer.mail_from_help") !!}
+                            To use PHP's <a target="_blank" href="http://php.net/manual/en/function.mail.php">mail</a>
+                            feature enter <b>mail</b> in this box and leave the below fields empty.
                         </div>
                     </div>
 
                     <div class="form-group">
-                        {!! Form::label('mail_port', trans("Installer.mail_port"), array('class'=>' control-label ')) !!}
-                        {!!  Form::text('mail_port', $value = env("MAIL_PORT"),
+                        {!! Form::label('mail_port', 'Mail Port', array('class'=>' control-label ')) !!}
+                        {!!  Form::text('mail_port', Input::old('mail_port'),
                                     array(
                                     'class'=>'form-control'
                                     ))  !!}
                     </div>
                     <div class="form-group">
-                        {!! Form::label('mail_encryption', trans("Installer.mail_encryption"), array('class'=>' control-label ')) !!}
+                        {!! Form::label('mail_encryption', 'Mail Encryption', array('class'=>' control-label ')) !!}
                         {!!  Form::text('mail_encryption', Input::old('mail_encryption'),
                                     array(
-                                    'class'=>'form-control',
-                                    'placeholder' => "tls/ssl"
+                                    'class'=>'form-control'
                                     ))  !!}
                     </div>
                     <div class="form-group">
-                        {!! Form::label('mail_host', trans("Installer.mail_host"), array('class'=>' control-label ')) !!}
-                        {!!  Form::text('mail_host', $value = env("MAIL_HOST"),
+                        {!! Form::label('mail_host', 'Mail Host', array('class'=>' control-label ')) !!}
+                        {!!  Form::text('mail_host', Input::old('mail_host'),
                                     array(
                                     'class'=>'form-control'
                                     ))  !!}
                     </div>
                     <div class="form-group">
-                        {!! Form::label('mail_username', trans("Installer.mail_username"), array('class'=>' control-label ')) !!}
+                        {!! Form::label('mail_username', 'Mail Username', array('class'=>' control-label ')) !!}
                         {!!  Form::text('mail_username', Input::old('mail_username'),
                                     array(
                                     'class'=>'form-control'
                                     ))  !!}
                     </div>
                     <div class="form-group">
-                        {!! Form::label('mail_password', trans("Installer.mail_password"), array('class'=>' control-label ')) !!}
+                        {!! Form::label('mail_password', 'Mail Password', array('class'=>' control-label ')) !!}
                         {!!  Form::text('mail_password', Input::old('mail_password'),
                                     array(
                                     'class'=>'form-control'
                                     ))  !!}
                     </div>
-                    {!! csrf_field() !!}
-                    @include("Installer.Partials.Footer")
 
-                    {!! Form::submit(trans("Installer.install"), ['class'=>" btn-block btn btn-success"]) !!}
+                    <div class="well">
+                        <p>
+                            Installation may make take several minutes to complete. Once you click '<b>Install Attendize</b>' the config settings will be written to this file: <b>{{base_path('.env')}}</b>. You can manually change these settings in the future by editing this file.
+                        </p>
+                        <p>
+                            If the install fails be sure to check the log file in <b>{{storage_path('logs')}}</b>. If there are no errors in the log files also <b>check other log files on your server</b>.
+                        </p>
+                        <p>
+                            If you are using shared hosting please ask your host if they support the Attendize requirements before requesting support.
+                        </p>
+                        <p>
+                            If you still need help you can ask a question in the <a href="https://attendize.com/forum/">support forum</a>. Please include as much detail as possible, including any errors in the log file.
+                        </p>
+                        <p>
+                            Please also  <a style="text-decoration: underline;" target="_blank" href="https://attendize.com/licence.php?from_installer">read the licence</a> before installing Attendize.
+                        </p>
+                    </div>
+
+                    {!! Form::submit('Install Attendize', ['class'=>" btn-block btn btn-success"]) !!}
                     {!! Form::close() !!}
 
                 </div>

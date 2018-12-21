@@ -35,6 +35,8 @@ class EventViewController extends Controller
             'event'       => $event,
             'tickets'     => $event->tickets()->where('is_hidden', 0)->orderBy('sort_order', 'asc')->get(),
             'is_embedded' => 0,
+            'is_logged_in'=> false,
+            'logged_user'=> null
         ];
         /*
          * Don't record stats if we're previewing the event page from the backend or if we own the event.
@@ -44,6 +46,10 @@ class EventViewController extends Controller
             $event_stats->updateViewCount($event_id);
         }
 
+        if (Auth::check()){
+            $data['is_logged_in'] = true;
+            $data['logged_user'] = Auth::user();
+        }
         /*
          * See if there is an affiliate referral in the URL
          */
@@ -65,7 +71,7 @@ class EventViewController extends Controller
             }
         }
 
-        return view('Public.ViewEvent.EventPage', $data);
+        return view('Public.ViewEvent.EquisEventPage', $data);
     }
 
     /**
@@ -110,18 +116,19 @@ class EventViewController extends Controller
             'sender_email'    => $request->get('email'),
             'message_content' => strip_tags($request->get('message')),
             'event'           => $event,
+            'extra_fields' => $request->except(['name','email','message'])
         ];
 
         Mail::send('Emails.messageReceived', $data, function ($message) use ($event, $data) {
             $message->to($event->organiser->email, $event->organiser->name)
                 ->from(config('attendize.outgoing_email_noreply'), $data['sender_name'])
                 ->replyTo($data['sender_email'], $data['sender_name'])
-                ->subject(trans("Email.message_regarding_event", ["event"=>$event->title]));
+                ->subject('Message Regarding: ' . $event->title);
         });
 
         return response()->json([
             'status'  => 'success',
-            'message' => trans("Controllers.message_successfully_sent"),
+            'message' => 'Message Successfully Sent',
         ]);
     }
 

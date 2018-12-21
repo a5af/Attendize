@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Account;
 use App\Models\Timezone;
 use App\Models\User;
+use App\Models\Role;
 use DB;
 use Hash;
 use Illuminate\Console\Command;
@@ -99,6 +100,8 @@ class Install extends Command
                 $user_data['is_parent'] = 1;
                 $user_data['is_registered'] = 1;
                 $user = User::create($user_data);
+                $ownerRole = Role::where('name', 'owner')->first();
+                $user->attachRole($ownerRole);
 
                 DB::commit();
                 $this->info('Admin User Successfully Created');

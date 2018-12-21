@@ -14,6 +14,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         //require app_path('Attendize/constants.php');
+        if (config('services.rollbar.access_token')) {
+            $this->app->register(\Jenssegers\Rollbar\RollbarServiceProvider::class);
+        }
+        if ($this->app->environment('local')) {
+            $this->app->register(\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class);
+        }
     }
 
     /**
@@ -28,7 +34,8 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(
-            'Illuminate\Contracts\Auth\Registrar', 'App\Services\Registrar'
+            'Illuminate\Contracts\Auth\Registrar',
+            'App\Services\Registrar'
         );
     }
 }

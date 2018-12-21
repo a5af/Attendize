@@ -28,8 +28,7 @@
         var $div = $("<div>", {id: "DatePicker"});
         $("body").append($div);
         $div.DateTimePicker({
-            dateTimeFormat: window.Attendize.DateTimeFormat,
-            dateSeparator: window.Attendize.DateSeparator
+            dateTimeFormat: window.Attendize.DateTimeFormat
         });
 
     });

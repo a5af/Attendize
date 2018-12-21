@@ -20,47 +20,47 @@
                 <p>
                     @if($event->organiser->facebook)
                         <a property="sameAs" href="https://fb.com/{{$event->organiser->facebook}}" class="btn btn-facebook">
-                            <i class="ico-facebook"></i>&nbsp; @lang("Public_ViewEvent.Facebook")
+                            <i class="ico-facebook"></i>&nbsp; Facebook
                         </a>
                     @endif
                         @if($event->organiser->twitter)
                             <a property="sameAs" href="https://twitter.com/{{$event->organiser->twitter}}" class="btn btn-twitter">
-                                <i class="ico-twitter"></i>&nbsp; @lang("Public_ViewEvent.Twitter")
+                                <i class="ico-twitter"></i>&nbsp; Twitter
                             </a>
                         @endif
                     <button onclick="$(function(){ $('.contact_form').slideToggle(); });" type="button" class="btn btn-primary">
-                        <i class="ico-envelop"></i>&nbsp; @lang("Public_ViewEvent.Contact")
+                        <i class="ico-envelop"></i>&nbsp; Contact
                     </button>
                 </p>
                 <div class="contact_form well well-sm">
                     {!! Form::open(array('url' => route('postContactOrganiser', array('event_id' => $event->id)), 'class' => 'reset ajax')) !!}
                     <h3>Contact <i>{{$event->organiser->name}}</i></h3>
                     <div class="form-group">
-                        {!! Form::label(trans("Public_ViewEvent.your_name")) !!}
+                        {!! Form::label('Your Name') !!}
                         {!! Form::text('name', null,
                             array('required',
                                   'class'=>'form-control',
-                                  'placeholder'=>trans("Public_ViewEvent.your_name"))) !!}
+                                  'placeholder'=>'Your name')) !!}
                     </div>
 
                     <div class="form-group">
-                        {!! Form::label(trans("Public_ViewEvent.your_email_address")) !!}
+                        {!! Form::label('Your E-mail Address') !!}
                         {!! Form::text('email', null,
                             array('required',
                                   'class'=>'form-control',
-                                  'placeholder'=>trans("Public_ViewEvent.your_email_address"))) !!}
+                                  'placeholder'=>'Your e-mail address')) !!}
                     </div>
 
                     <div class="form-group">
-                        {!! Form::label(trans("Public_ViewEvent.your_message")) !!}
+                        {!! Form::label('Your Message') !!}
                         {!! Form::textarea('message', null,
                             array('required',
                                   'class'=>'form-control',
-                                  'placeholder'=>trans("Public_ViewEvent.your_message"))) !!}
+                                  'placeholder'=>'Your message')) !!}
                     </div>
 
                     <div class="form-group">
-                        {!! Form::submit(trans("Public_ViewEvent.send_message_submit"),
+                        {!! Form::submit('Send Message',
                           array('class'=>'btn btn-primary')) !!}
                     </div>
                 </div>

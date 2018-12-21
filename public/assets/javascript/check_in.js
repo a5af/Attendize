@@ -15,7 +15,8 @@ var checkinApp = new Vue({
         canvasContext: $('canvas#QrCanvas')[0].getContext('2d'),
         successBeep: new Audio('/mp3/beep.mp3'),
         scanResult: false,
-        scanResultObject: {}
+        scanResultMessage: '',
+        scanResultType: null
     },
 
     created: function () {
@@ -30,7 +31,6 @@ var checkinApp = new Vue({
             this.$http.post(Attendize.checkInSearchRoute, {q: this.searchTerm}).then(function (res) {
                 this.attendees = res.data;
                 this.searchResultsCount = (Object.keys(res.data).length);
-                console.log('Successfully fetched attendees')
             }, function () {
                 console.log('Failed to fetch attendees')
             });
@@ -77,10 +77,11 @@ var checkinApp = new Vue({
             this.$http.post(Attendize.qrcodeCheckInRoute, {attendee_reference: attendeeReferenceCode}).then(function (res) {
                 this.successBeep.play();
                 this.scanResult = true;
-                this.scanResultObject = res.data;
+                this.scanResultMessage = res.data.message;
+                this.scanResultType = res.data.status;
 
             }, function (response) {
-                this.scanResultObject.message = lang("whoops2");
+                this.scanResultMessage = 'Something went wrong! Refresh the page and try again';
             });
         },
 
@@ -109,23 +110,19 @@ var checkinApp = new Vue({
             qrcode.callback = this.QrCheckin;
             navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-            navigator.getUserMedia({
-                video: {
-                    facingMode: 'environment'
-                },
-                audio: false
-            }, function (stream) {
+            navigator.getUserMedia({video: true, audio: false}, function (stream) {
 
                 that.stream = stream;
 
-                if (that.videoElement.mozSrcObject !== undefined) { // works on firefox now
+                if (window.webkitURL) {
+                    that.videoElement.src = window.webkitURL.createObjectURL(stream);
+                } else {
                     that.videoElement.mozSrcObject = stream;
-                } else if(window.URL) { // and chrome, but must use https
-                    that.videoElement.srcObject = stream;
-                };
+                }
+
+                that.videoElement.play();
 
             }, function () { /* error*/
-                alert(lang("checkin_init_error"));
             });
 
             this.isInit = true;
@@ -166,8 +163,8 @@ var checkinApp = new Vue({
             this.showScannerModal = false;
             track = this.stream.getTracks()[0];
             track.stop();
-            this.isInit = false;
             this.fetchAttendees();
         }
     }
 });
+

@@ -5,17 +5,17 @@
 @stop
 
 @section('blankslate-title')
-    @lang("Event.no_events_yet")
+    No Events Yet!
 @stop
 
 @section('blankslate-text')
-    @lang("Event.no_events_yet_text")
+    Looks like you have yet to create an event. You can create one by clicking the button below.
 @stop
 
 @section('blankslate-body')
 <button data-invoke="modal" data-modal-id="CreateEvent" data-href="{{route('showCreateEvent', ['organiser_id' => $organiser->id])}}" href='javascript:void(0);'  class="btn btn-success mt5 btn-lg" type="button">
     <i class="ico-ticket"></i>
-    @lang("Event.create_event")
+    Create Event
 </button>
 @stop
 

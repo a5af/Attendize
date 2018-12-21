@@ -37,7 +37,7 @@ class RemindersController extends Controller
      */
     protected function getEmailSubject()
     {
-        return isset($this->subject) ? $this->subject : trans("Controllers.your_password_reset_link");
+        return isset($this->subject) ? $this->subject : 'Your Password Reset Link';
     }
 
     /**
@@ -59,7 +59,9 @@ class RemindersController extends Controller
     {
         $this->validate($request, ['email' => 'required']);
 
-        $response = $this->passwords->sendResetLink($request->only('email'));
+        $response = $this->passwords->sendResetLink($request->only('email'), function ($m) {
+            $m->subject($this->getEmailSubject());
+        });
 
         switch ($response) {
             case PasswordBroker::RESET_LINK_SENT:
@@ -113,7 +115,7 @@ class RemindersController extends Controller
 
         switch ($response) {
             case PasswordBroker::PASSWORD_RESET:
-                \Session::flash('message', trans("Controllers.password_successfully_reset"));
+                \Session::flash('message', 'Password Successfully Reset');
 
                 return redirect(route('login'));
 

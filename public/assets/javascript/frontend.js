@@ -3923,7 +3923,7 @@ function log() {
   $.payment.cards = cards = [
     {
       type: 'elo',
-      patterns: [401178, 401179, 431274, 438935, 451416, 457393, 457631, 457632, 504175, 506699, 5067, 509, 627780, 636297, 636368, 650, 6516, 6550],
+      patterns: [4011, 4312, 4389, 4514, 4573, 4576, 5041, 5066, 5067, 509, 6277, 6362, 6363, 650, 6516, 6550],
       format: defaultFormat,
       length: [16],
       cvcLength: [3],
@@ -4596,7 +4596,8 @@ function log() {
                         }
 
                         toggleSubmitDisabled($submitButton);
-                        showMessage(lang("whoops"));
+                        showMessage('Whoops!, it looks like the server returned an error.\n\
+                   Please try again, or contact the webmaster if the problem persists.');
                     },
                     success: function(data, statusText, xhr, $form) {
                         var $submitButton = $form.find('input[type=submit]');
@@ -4641,9 +4642,10 @@ function log() {
         if ($form.hasClass('payment-form') && !$('#pay_offline').is(":checked")) {
             clearFormErrors($('.payment-form'));
 
-            Stripe.setPublishableKey($form.data('stripe-pub-key'));
+            var submitWithCVC = function () {
+                Stripe.setPublishableKey($form.data('stripe-pub-key'));
 
-            var
+                var
                     noErrors = true,
                     $cardNumber = $('.card-number'),
                     $cardName = $('.card-name'),
@@ -4652,49 +4654,60 @@ function log() {
                     $expiryYear = $('.card-expiry-year');
 
 
-            if (!Stripe.validateCardNumber($cardNumber.val())) {
-                showFormError($cardNumber, lang("credit_card_error"));
-                noErrors = false;
-            }
+                if (!Stripe.validateCardNumber($cardNumber.val())) {
+                    showFormError($cardNumber, 'The credit card number appears to be invalid.');
+                    noErrors = false;
+                }
 
-            if (!Stripe.validateCVC($cvcNumber.val())) {
-                showFormError($cardNumber, lang("cvc_error"));
-                noErrors = false;
-            }
+                if (!Stripe.validateCVC($cvcNumber.val())) {
+                    showFormError($cvcNumber, 'The CVC number appears to be invalid.');
+                    noErrors = false;
+                }
 
-            if (!Stripe.validateExpiry($expiryMonth.val(), $expiryYear.val())) {
-                showFormError($cardNumber, lang("expiry_error"));
-                showFormError($expiryYear, '');
-                noErrors = false;
-            }
+                if (!Stripe.validateExpiry($expiryMonth.val(), $expiryYear.val())) {
+                    showFormError($expiryMonth, 'The expiration date appears to be invalid.');
+                    showFormError($expiryYear, '');
+                    noErrors = false;
+                }
 
-            if (noErrors) {
-                Stripe.card.createToken({
-                    name: $cardName.val(),
-                    number: $cardNumber.val(),
-                    cvc: $cvcNumber.val(),
-                    exp_month: $expiryMonth.val(),
-                    exp_year: $expiryYear.val()
-                },
-                function(status, response) {
+                if (noErrors) {
+                    Stripe.card.createToken({
+                            name: $cardName.val(),
+                            number: $cardNumber.val(),
+                            cvc: $cvcNumber.val(),
+                            exp_month: $expiryMonth.val(),
+                            exp_year: $expiryYear.val()
+                        },
+                        function(status, response) {
 
-                    if (response.error) {
-                        clearFormErrors($('.payment-form'));
-                        if(response.error.param.length>0)
-                            showFormError($('*[data-stripe=' + response.error.param + ']', $('.payment-form')), response.error.message);
-                        else
-                            showMessage(response.error.message);
-                        toggleSubmitDisabled($submitButton);
-                    } else {
-                        var token = response.id;
-                        $form.append($('<input type="hidden" name="stripeToken" />').val(token));
-                        $form.ajaxSubmit(ajaxFormConf);
-                    }
+                            if (response.error) {
+                                clearFormErrors($('.payment-form'));
+                                showFormError($('*[data-stripe=' + response.error.param + ']', $('.payment-form')), response.error.message);
+                                toggleSubmitDisabled($submitButton);
+                            } else {
+                                var token = response.id;
+                                $form.append($('<input type="hidden" name="stripeToken" />').val(token));
+                                $form.ajaxSubmit(ajaxFormConf);
+                            }
 
+                        });
+                } else {
+                    showMessage('Please check your card details and try again.');
+                    toggleSubmitDisabled($submitButton);
+                }
+            }  ;
+
+            var promoCode = $('.promo-code').val();
+            if(promoCode) {
+                $.get('/e/promo-code/100-percent-off?code=' + promoCode ,function(data, status) {
+                  if(data.status === 'success') {
+                      $form.ajaxSubmit(ajaxFormConf);
+                  } else {
+                      submitWithCVC();
+                  }
                 });
             } else {
-                showMessage(lang("card_validation_error"));
-                toggleSubmitDisabled($submitButton);
+                submitWithCVC()
             }
 
         } else {
@@ -4791,7 +4804,7 @@ function toggleSubmitDisabled($submitButton) {
     $submitButton.data('original-text', $submitButton.val())
             .attr('disabled', true)
             .addClass('disabled')
-            .val(lang("processing"));
+            .val('Just a second...');
 }
 
 /**
@@ -4854,18 +4867,18 @@ function setCountdown($element, seconds) {
     function updateTimer() {
         msLeft = endTime - (+new Date);
         if (msLeft < 1000) {
-            alert(lang("time_run_out"));
+            alert("You have run out of time! You will have to restart the order process.");
             location.reload();
         } else {
 
             if (msLeft < 120000 && !twoMinWarningShown) {
-                showMessage(lang("just_2_minutes"));
+                showMessage("You only have 2 minutes left to complete this order!");
                 twoMinWarningShown = true;
             }
 
             time = new Date(msLeft);
             mins = time.getUTCMinutes();
-            $element.html('<b>' + mins + ':' + twoDigits(time.getUTCSeconds()) + '</b>');
+            $element.html('<b>' + mins + '</b> minutes and <b>' + twoDigits(time.getUTCSeconds()) + '</b> seconds');
             setTimeout(updateTimer, time.getUTCMilliseconds() + 500);
         }
     }

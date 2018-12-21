@@ -2,6 +2,13 @@
 
 @section('head')
     <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+    <script>
+        var event = new Event('change_page_size');
+
+        // Dispatch the event.
+        window.parent.dispatchEvent(event);
+
+    </script>
 @stop
 
 @section('content')

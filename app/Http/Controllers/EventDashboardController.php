@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use DateInterval;
 use DatePeriod;
 use DateTime;
+use Entrust;
 
 class EventDashboardController extends MyBaseController
 {
@@ -19,6 +20,11 @@ class EventDashboardController extends MyBaseController
      */
     public function showDashboard($event_id = false)
     {
+        if (!Entrust::hasRole(['owner', 'admin'])) {
+            return redirect(route('showMyTickets', [
+                'event_id' => $event_id
+            ]));
+        }
         $event = Event::scope()->findOrFail($event_id);
 
         $num_days = 20;

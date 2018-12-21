@@ -63,6 +63,15 @@ class Order extends MyBaseModel
     }
 
     /**
+     * The promo-code associated with the order
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function promoCode()
+    {
+        return $this->belongsTo(\App\Models\PromoCode::class);
+    }
+
+    /**
      * The event associated with the order.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -106,7 +115,7 @@ class Order extends MyBaseModel
      */
     public function getOrganiserAmountAttribute()
     {
-        return $this->amount + $this->organiser_booking_fee + $this->taxamt;
+        return $this->amount + $this->organiser_booking_fee;
     }
 
     /**

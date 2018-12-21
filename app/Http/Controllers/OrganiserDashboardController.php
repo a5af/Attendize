@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Organiser;
 use Carbon\Carbon;
+use Entrust;
 
 class OrganiserDashboardController extends MyBaseController
 {
@@ -15,6 +16,12 @@ class OrganiserDashboardController extends MyBaseController
      */
     public function showDashboard($organiser_id)
     {
+        if (!Entrust::hasRole(['owner', 'admin'])) {
+            return redirect(route('showOrganiserEvents', [
+                'organiser_id' => $organiser_id
+            ]));
+        }
+
         $organiser = Organiser::scope()->findOrFail($organiser_id);
         $upcoming_events = $organiser->events()->where('end_date', '>=', Carbon::now())->get();
         $calendar_events = [];

@@ -24,13 +24,13 @@ return [
     ],
 
     'ses' => [
-        'key'    => '',
+        'key' => '',
         'secret' => '',
         'region' => 'us-east-1',
     ],
 
     'stripe' => [
-        'model'  => 'User',
+        'model' => 'User',
         'secret' => '',
     ],
 
@@ -40,5 +40,14 @@ return [
 
     'sparkpost' => [
         'secret' => env('SPARKPOST_SECRET')
-    ]
+    ],
+    'intercom' => [
+        'app_id' => env('INTERCOM_APP_ID', ''),
+        'key' => env('INTERCOM_KEY', '')
+    ],
+    'rollbar' => [
+        'access_token' => env('ROLLBAR_TOKEN'),
+        'level' => env('ROLLBAR_LEVEL', 'error'),
+    ],
+
 ];
