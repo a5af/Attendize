@@ -32,7 +32,8 @@ class Attendee extends MyBaseModel
         'account_id',
         'reference',
         'has_arrived',
-        'arrival_time'
+        'arrival_time',
+        'assigned_to'
     ];
 
     /**
@@ -44,7 +45,7 @@ class Attendee extends MyBaseModel
         parent::boot();
 
         static::creating(function ($order) {
-            $order->private_reference_number = str_pad(random_int(0, pow(10, 9) - 1), 9, '0', STR_PAD_LEFT);
+            $order->private_reference_number = str_pad(rand(0, pow(10, 9) - 1), 9, '0', STR_PAD_LEFT);
         });
     }
 
@@ -58,6 +59,14 @@ class Attendee extends MyBaseModel
         return $this->belongsTo(\App\Models\Order::class);
     }
 
+    /***
+     * The user associated with the attendee
+     */
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'purchased_by');
+    }
+
     /**
      * The ticket associated with the attendee.
      *
@@ -66,6 +75,16 @@ class Attendee extends MyBaseModel
     public function ticket()
     {
         return $this->belongsTo(\App\Models\Ticket::class);
+    }
+
+    /**
+     * The breakout session associated with the attendee.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function breakoutSessions()
+    {
+        return $this->belongsToMany(\App\Models\BreakoutSession::class);
     }
 
     /**
@@ -127,5 +146,11 @@ class Attendee extends MyBaseModel
     public function getDates()
     {
         return ['created_at', 'updated_at', 'arrival_time'];
+    }
+
+
+    public function joinedBreakoutSession()
+    {
+        return (bool)$this->breakoutSessions()->first();
     }
 }

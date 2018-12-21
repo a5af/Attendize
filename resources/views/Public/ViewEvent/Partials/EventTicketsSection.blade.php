@@ -1,13 +1,13 @@
 <section id="tickets" class="container">
     <div class="row">
         <h1 class='section_head'>
-            @lang("Public_ViewEvent.tickets")
+            Tickets
         </h1>
     </div>
 
-    @if($event->end_date->isPast())
+    @if($event->start_date->isPast())
         <div class="alert alert-boring">
-            @lang("Public_ViewEvent.event_already", ['started' => trans('Public_ViewEvent.event_already_ended')])
+            This event has {{($event->end_date->isFuture() ? 'already started' : 'ended')}}.
         </div>
     @else
 
@@ -32,17 +32,16 @@
                                                 {{$ticket->description}}
                                             </p>
                                         </td>
-                                        <td style="width:200px; text-align: right;">
+                                        <td style="width:180px; text-align: right;">
                                             <div class="ticket-pricing" style="margin-right: 20px;">
                                                 @if($ticket->is_free)
-                                                    @lang("Public_ViewEvent.free")
+                                                    FREE
                                                     <meta property="price" content="0">
                                                 @else
                                                     <?php
                                                     $is_free_event = false;
                                                     ?>
-                                                    <span title='{{money($ticket->price, $event->currency)}} @lang("Public_ViewEvent.ticket_price") + {{money($ticket->total_booking_fee, $event->currency)}} @lang("Public_ViewEvent.booking_fees")'>{{money($ticket->total_price, $event->currency)}} </span>
-                                                    <span class="tax-amount text-muted text-smaller">{{ ($event->organiser->tax_name && $event->organiser->tax_value) ? '(+'.money(($ticket->total_price*($event->organiser->tax_value)/100), $event->currency).' '.$event->organiser->tax_name.')' : '' }}</span>
+                                                    <span title='{{money($ticket->price, $event->currency)}} Ticket Price + {{money($ticket->total_booking_fee, $event->currency)}} Booking Fees'>{{money($ticket->total_price, $event->currency)}} </span>
                                                     <meta property="priceCurrency"
                                                           content="{{ $event->currency->code }}">
                                                     <meta property="price"
@@ -54,7 +53,7 @@
                                             @if($ticket->is_paused)
 
                                                 <span class="text-danger">
-                                    @lang("Public_ViewEvent.currently_not_on_sale")
+                                    Currently Not On Sale
                                 </span>
 
                                             @else
@@ -62,15 +61,15 @@
                                                 @if($ticket->sale_status === config('attendize.ticket_status_sold_out'))
                                                     <span class="text-danger" property="availability"
                                                           content="http://schema.org/SoldOut">
-                                    @lang("Public_ViewEvent.sold_out")
+                                    Sold Out
                                 </span>
                                                 @elseif($ticket->sale_status === config('attendize.ticket_status_before_sale_date'))
                                                     <span class="text-danger">
-                                    @lang("Public_ViewEvent.sales_have_not_started")
+                                    Sales Have Not Started
                                 </span>
                                                 @elseif($ticket->sale_status === config('attendize.ticket_status_after_sale_date'))
                                                     <span class="text-danger">
-                                    @lang("Public_ViewEvent.sales_have_ended")
+                                    Sales Have Ended
                                 </span>
                                                 @else
                                                     {!! Form::hidden('tickets[]', $ticket->id) !!}
@@ -91,11 +90,6 @@
                                     </tr>
                                 @endforeach
 
-                                    <tr>
-                                        <td colspan="3" style="text-align: center">
-                                            @lang("Public_ViewEvent.below_tickets")
-                                        </td>
-                                    </tr>
                                 <tr class="checkout">
                                     <td colspan="3">
                                         @if(!$is_free_event)
@@ -105,13 +99,14 @@
                                                 @if($event->enable_offline_payments)
 
                                                     <div class="help-block" style="font-size: 11px;">
-                                                        @lang("Public_ViewEvent.offline_payment_methods_available")
+                                                        Offline Payment Methods Available
                                                     </div>
                                                 @endif
+
                                             </div>
 
                                         @endif
-                                        {!!Form::submit(trans("Public_ViewEvent.register"), ['class' => 'btn btn-lg btn-primary pull-right'])!!}
+                                        {!!Form::submit('Register', ['class' => 'btn btn-lg btn-primary pull-right'])!!}
                                     </td>
                                 </tr>
                             </table>
@@ -125,7 +120,7 @@
         @else
 
             <div class="alert alert-boring">
-                @lang("Public_ViewEvent.tickets_are_currently_unavailable")
+                Tickets are currently unavailable.
             </div>
 
         @endif

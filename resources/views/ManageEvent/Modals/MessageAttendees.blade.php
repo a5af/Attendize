@@ -6,12 +6,12 @@
                 <button type="button" class="close" data-dismiss="modal">×</button>
                 <h3 class="modal-title">
                     <i class="ico-envelope"></i>
-                    @lang("ManageEvent.message_attendees_title")</h3>
+                    Message Attendees</h3>
             </div>
             <div class="modal-body">
                 <ul class="nav nav-tabs">
-                    <li class="active"><a href="#new_message" data-toggle="tab">@lang("Message.new_message")</a></li>
-                    <li><a href="#sent_messages" data-toggle="tab">@lang("Message.sent_messages")</a></li>
+                    <li class="active"><a href="#new_message" data-toggle="tab">New Message</a></li>
+                    <li><a href="#sent_messages" data-toggle="tab">Sent Messages</a></li>
                 </ul>
 
                 <div class="tab-content panel">
@@ -19,7 +19,7 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    {!! Form::label('subject',  trans("Message.subject"), array('class'=>'control-label required')) !!}
+                                    {!! Form::label('subject', 'Message Subject', array('class'=>'control-label required')) !!}
                                     {!!  Form::text('subject', Input::old('subject'),
                                         array(
                                         'class'=>'form-control'
@@ -27,7 +27,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    {!! Form::label('message', trans("Message.content"), array('class'=>'control-label required')) !!}
+                                    {!! Form::label('message', 'Message Content', array('class'=>'control-label required')) !!}
                                     {!!  Form::textarea('message', Input::old('message'),
                                         array(
                                         'class'=>'form-control',
@@ -35,23 +35,23 @@
                                         ))  !!}
                                 </div>
                                 <div class="form-group">
-                                    {!! Form::label('recipients', trans("Message.send_to"), array('class'=>'control-label required')) !!}
+                                    {!! Form::label('recipients', 'Send To', array('class'=>'control-label required')) !!}
                                     {!!  Form::select('recipients', [
-                                            'all' => trans("Message.all_event_attendees")
-                                        ] + [trans("Message.attendees_with_ticket_type") => $tickets] ,
+                                            'all' => 'All Event Attendees'
+                                        ] + ['Attendees with ticket type' => $tickets] ,
                                         null, [
                                             'class'=>'form-control'
                                         ])  !!}
                                 </div>
 
                                 <div class="form-group hide">
-                                    {!! Form::label('sent_time', trans("Message.schedule_send_time"), array('class'=>'control-label required')) !!}
+                                    {!! Form::label('sent_time', 'Schedule Send Time', array('class'=>'control-label required')) !!}
                                     {!!  Form::text('sent_time', Input::old('sent_time'),
                                         array(
                                         'class'=>'form-control'
                                         ))  !!}
                                     <div class="help-block">
-                                        @lang("Message.leave_blank_to_send_immediately")
+                                        Leave blank to send immediately.
                                     </div>
                                 </div>
                             </div>
@@ -69,12 +69,12 @@
                                             <tr>
                                                 <td style="width: 100px;">
                                                     <h5>
-                                                        <b>@lang("Message.date")</b>
+                                                        <b>Date</b>
                                                     </h5>
                                                 </td>
                                                 <td>
                                                     <h5>
-                                                        <b>@lang("Message.message")</b>
+                                                        <b>Message</b>
                                                     </h5>
                                                 </td>
                                             </tr>
@@ -83,14 +83,10 @@
                                             @foreach($event->messages as $message)
                                                 <tr>
                                                     <td class="meta">
-                                                        @if($message->sent_at!=null) <?php /* Can occur when there was mailing error*/ ?>
-                                                            <p class="date">{{$message->sent_at->format(env("DEFAULT_DATETIME_FORMAT"))}}</p>
-                                                        @else
-                                                            <p class="date">@lang("Message.unsent")</p>
-                                                        @endif
+                                                        <p class="date">{{$message->sent_at->format('M j, Y, g:i a')}}</p>
                                                     </td>
                                                     <td class="message">
-                                                        <h5 class="sender">@lang("Message.to"): <b>{{$message->recipients_label}}</b></h5>
+                                                        <h5 class="sender">To: <b>{{$message->recipients_label}}</b></h5>
                                                         <h5 class="heading"><a href="javascript:void();">{{$message->subject}}</a></h5>
 
                                                         <p class="text">{{nl2br($message->message)}}</p>
@@ -106,15 +102,15 @@
                             </div>
                         @else
                             <div class="alert alert-info">
-                                @lang("Message.no_messages_for_event")
+                                You have not sent any messages for this event.
                             </div>
                         @endif
                     </div>
                 </div>
             </div> <!-- /end modal body-->
             <div class="modal-footer">
-                {!! Form::button(trans("basic.cancel"), ['class'=>"btn modal-close btn-danger",'data-dismiss'=>'modal']) !!}
-                {!! Form::submit(trans("ManageEvent.send_message"), ['class'=>"btn btn-success"]) !!}
+                {!! Form::button('Cancel', ['class'=>"btn modal-close btn-danger",'data-dismiss'=>'modal']) !!}
+                {!! Form::submit('Send Message', ['class'=>"btn btn-success"]) !!}
             </div>
         </div><!-- /end modal content-->
         {!! Form::close() !!}

@@ -11,7 +11,7 @@
     <li class="nav-button ">
         <a target="_blank" href="{{ route('showOrganiserHome',[$organiser->id]) }}">
             <span>
-                <i class="ico-eye2"></i>&nbsp;@lang("Organiser.organiser_page")
+                <i class="ico-eye2"></i>&nbsp;Organiser Page
             </span>
         </a>
     </li>

@@ -8,7 +8,6 @@ use App\Models\Attendee;
 use App\Models\Event;
 use App\Models\EventStats;
 use App\Models\Order;
-use App\Services\Order as OrderService;
 use DB;
 use Excel;
 use Illuminate\Http\Request;
@@ -16,6 +15,8 @@ use Log;
 use Mail;
 use Omnipay;
 use Validator;
+use Auth;
+use Redirect;
 
 class EventOrdersController extends MyBaseController
 {
@@ -46,8 +47,10 @@ class EventOrdersController extends MyBaseController
                 $searchQuery = str_replace('#', '', $searchQuery);
             }
 
-            $orders = $event->orders()
-                ->where(function ($query) use ($searchQuery) {
+            $orders = $event->orders();
+            if(!Auth::user()->hasRole(['owner', 'admin']))
+                $orders = $orders->where('email',Auth::user()->email);
+            $orders = $orders->where(function ($query) use ($searchQuery) {
                     $query->where('order_reference', 'like', $searchQuery . '%')
                         ->orWhere('first_name', 'like', $searchQuery . '%')
                         ->orWhere('email', 'like', $searchQuery . '%')
@@ -56,7 +59,10 @@ class EventOrdersController extends MyBaseController
                 ->orderBy($sort_by, $sort_order)
                 ->paginate();
         } else {
-            $orders = $event->orders()->orderBy($sort_by, $sort_order)->paginate();
+            $orders = $event->orders();
+            if(!Auth::user()->hasRole(['owner', 'admin']))
+                $orders = $orders->where('email',Auth::user()->email);
+            $orders = $orders->orderBy($sort_by, $sort_order)->paginate();
         }
 
         $data = [
@@ -79,14 +85,8 @@ class EventOrdersController extends MyBaseController
      */
     public function manageOrder(Request $request, $order_id)
     {
-        $order = Order::scope()->find($order_id);
-
-        $orderService = new OrderService($order->amount, $order->booking_fee, $order->event);
-        $orderService->calculateFinalCosts();
-
         $data = [
-            'order' => $order,
-            'orderService' => $orderService
+            'order' => Order::scope()->find($order_id),
         ];
 
         return view('ManageEvent.Modals.ManageOrder', $data);
@@ -186,7 +186,7 @@ class EventOrdersController extends MyBaseController
         $order->update();
 
 
-        \Session::flash('message', trans("Controllers.the_order_has_been_updated"));
+        \Session::flash('message', 'The order has been updated');
 
         return response()->json([
             'status'      => 'success',
@@ -208,7 +208,7 @@ class EventOrdersController extends MyBaseController
             'refund_amount' => ['numeric'],
         ];
         $messages = [
-            'refund_amount.integer' => trans("Controllers.refund_only_numbers_error"),
+            'refund_amount.integer' => 'Refund amount must only contain numbers.',
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
@@ -230,18 +230,18 @@ class EventOrdersController extends MyBaseController
 
         if ($refund_order && $order->payment_gateway->can_refund) {
             if (!$order->transaction_id) {
-                $error_message = trans("Controllers.order_cant_be_refunded");
+                $error_message = 'Sorry, this order cannot be refunded.';
             }
 
             if ($order->is_refunded) {
-                $error_message = trans("Controllers.order_already_refunded");
+                $error_message = 'This order has already been refunded';
             } elseif ($order->organiser_amount == 0) {
-                $error_message = trans("Controllers.nothing_to_refund");
+                $error_message = 'Nothing to refund';
             } elseif ($refund_type !== 'full' && $refund_amount > round(($order->organiser_amount - $order->amount_refunded),
                     2)
             ) {
-                $error_message = trans("Controllers.maximum_refund_amount", ["money"=>(money($order->organiser_amount - $order->amount_refunded,
-                        $order->event->currency))]);
+                $error_message = 'The maximum amount you can refund is ' . (money($order->organiser_amount - $order->amount_refunded,
+                        $order->event->currency));
             }
             if (!$error_message) {
                 try {
@@ -280,7 +280,7 @@ class EventOrdersController extends MyBaseController
                     $order->save();
                 } catch (\Exeption $e) {
                     Log::error($e);
-                    $error_message = trans("Controllers.refund_exception");
+                    $error_message = 'There has been a problem processing your refund. Please check your information and try again.';
                 }
             }
 
@@ -301,7 +301,7 @@ class EventOrdersController extends MyBaseController
                 $attendee->ticket->decrement('quantity_sold');
                 $attendee->ticket->decrement('sales_volume', $attendee->ticket->price);
                 $order->event->decrement('sales_volume', $attendee->ticket->price);
-                $order->decrement('amount', $attendee->ticket->price);
+//                $order->decrement('amount', $attendee->ticket->price);
                 $attendee->is_cancelled = 1;
                 $attendee->save();
 
@@ -312,17 +312,9 @@ class EventOrdersController extends MyBaseController
                 }
             }
         }
-        if(!$refund_amount && !$attendees)
-            $msg = trans("Controllers.nothing_to_do");
-        else {
-            if($attendees && $refund_order)
-                $msg = trans("Controllers.successfully_refunded_and_cancelled");
-            else if($refund_order)
-                $msg = trans("Controllers.successfully_refunded_order");
-            else if($attendees)
-                $msg = trans("Controllers.successfully_cancelled_attendees");
-        }
-        \Session::flash('message', $msg);
+
+        \Session::flash('message',
+            (!$refund_amount && !$attendees) ? 'Nothing To Do' : 'Successfully ' . ($refund_order ? ' Refunded Order' : ' ') . ($attendees && $refund_order ? ' & ' : '') . ($attendees ? 'Cancelled Attendee(s)' : ''));
 
         return response()->json([
             'status'      => 'success',
@@ -351,8 +343,6 @@ class EventOrdersController extends MyBaseController
             $excel->sheet('orders_sheet_1', function ($sheet) use ($event) {
 
                 \DB::connection()->setFetchMode(\PDO::FETCH_ASSOC);
-                $yes = strtoupper(trans("basic.yes"));
-                $no = strtoupper(trans("basic.no"));
                 $data = DB::table('orders')
                     ->where('orders.event_id', '=', $event->id)
                     ->where('orders.event_id', '=', $event->id)
@@ -362,8 +352,8 @@ class EventOrdersController extends MyBaseController
                         'orders.email',
                         'orders.order_reference',
                         'orders.amount',
-                        \DB::raw("(CASE WHEN orders.is_refunded = 1 THEN '$yes' ELSE '$no' END) AS `orders.is_refunded`"),
-                        \DB::raw("(CASE WHEN orders.is_partially_refunded = 1 THEN '$yes' ELSE '$no' END) AS `orders.is_partially_refunded`"),
+                        \DB::raw("(CASE WHEN orders.is_refunded = 1 THEN 'YES' ELSE 'NO' END) AS `orders.is_refunded`"),
+                        \DB::raw("(CASE WHEN orders.is_partially_refunded = 1 THEN 'YES' ELSE 'NO' END) AS `orders.is_partially_refunded`"),
                         'orders.amount_refunded',
                         'orders.created_at',
                     ])->get();
@@ -373,15 +363,15 @@ class EventOrdersController extends MyBaseController
 
                 // Add headings to first row
                 $sheet->row(1, [
-                    trans("Attendee.first_name"),
-                    trans("Attendee.last_name"),
-                    trans("Attendee.email"),
-                    trans("Order.order_ref"),
-                    trans("Order.amount"),
-                    trans("Order.fully_refunded"),
-                    trans("Order.partially_refunded"),
-                    trans("Order.amount_refunded"),
-                    trans("Order.order_date"),
+                    'First Name',
+                    'Last Name',
+                    'Email',
+                    'Order Reference',
+                    'Amount',
+                    'Fully Refunded',
+                    'Partially Refunded',
+                    'Amount Refunded',
+                    'Order Date',
                 ]);
 
                 // Set gray background on first row
@@ -434,7 +424,7 @@ class EventOrdersController extends MyBaseController
             ]);
         }
 
-        $order = Order::scope()->findOrFail($order_id);
+        $order = Attendee::scope()->findOrFail($order_id);
 
         $data = [
             'order'           => $order,
@@ -457,13 +447,13 @@ class EventOrdersController extends MyBaseController
                 $message->to($order->event->organiser->email)
                     ->from(config('attendize.outgoing_email_noreply'), $order->event->organiser->name)
                     ->replyTo($order->event->organiser->email, $order->event->organiser->name)
-                    ->subject($data['subject'] . trans("Email.organiser_copy"));
+                    ->subject($data['subject'] . ' [Organiser copy]');
             });
         }
 
         return response()->json([
             'status'  => 'success',
-            'message' => trans("Controllers.message_successfully_sent"),
+            'message' => 'Message Successfully Sent',
         ]);
     }
 
@@ -483,10 +473,219 @@ class EventOrdersController extends MyBaseController
 
         $order->save();
 
-        session()->flash('message', trans("Controllers.order_payment_status_successfully_updated"));
+        session()->flash('message', 'Order Payment Status Successfully Updated');
 
         return response()->json([
             'status' => 'success',
         ]);
     }
+
+    /**
+     * Shows Refund Request modal
+     * @param Request $request
+     * @param $order_id
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function showRequestRefund(Request $request, $order_id)
+    {
+        $data = [
+            'order_id' => $order_id,
+        ];
+
+        return view('ManageEvent.Modals.RequestRefund', $data);
+    }
+
+    /**
+     * @param Request $request
+     * @param $order_id
+     * @return mixed
+     */
+    public function postRequestRefund(Request $request, $order_id)
+    {
+
+        $order = Order::scope()->findOrFail($order_id);
+
+        $order->is_refund_requested = true;
+        $order->update();
+
+        $data = [
+            'order' => $order
+        ];
+
+        Mail::send('Emails.RefundRequestNotification', $data, function ($message) use ($order) {
+            $message->to($order->account->email);
+            $message->cc([config('attendize.corp_email')]);
+            $message->subject('New refund request for event ' . $order->event->title . ' [' . $order->order_reference . ']');
+        });
+
+        session()->flash('message', 'Refund requested successfully.');
+
+        return response()->json([
+            'status'      => 'success',
+            'redirectUrl' => ''
+        ]);
+    }
+
+    public function showCancelRequestRefund(Request $request, $order_id)
+    {
+        $data = [
+            'order_id' => $order_id,
+        ];
+
+        return view('ManageEvent.Modals.CancelRequestRefund', $data);
+    }
+
+    public function postCancelRequestRefund(Request $request, $order_id)
+    {
+        $order = Order::scope()->findOrFail($order_id);
+
+        $order->is_refund_requested = false;
+        $order->update();
+
+        session()->flash('message', 'Refund request cancelled successfully.');
+
+        return response()->json([
+            'status'      => 'success',
+            'redirectUrl' => ''
+        ]);
+    }
+
+    public function showManageRefundRequest(Request $request, $order_id)
+    {
+        $data = [
+            'order' => Order::scope()->find($order_id),
+        ];
+
+        return view('ManageEvent.Modals.ManageRefundRequest', $data);
+    }
+
+    public function confirmRefundRequest(Request $request, $order_id)
+    {
+
+        $order = Order::scope()->findOrFail($order_id);
+
+        if (!$order->is_refund_requested) {
+            return response()->json([
+                'status' => 'success',
+            ]);
+        }
+
+        $error_message = false;
+
+        if ($order->payment_gateway->can_refund) {
+            if (!$order->transaction_id) {
+                    $error_message = 'Sorry, this order cannot be refunded.';
+            }
+
+            if ($order->is_refunded) {
+                $error_message = 'This order has already been refunded';
+            } elseif ($order->organiser_amount - $order->amount_refunded == 0) {
+                $error_message = 'Nothing to refund';
+            }
+
+            if (!$error_message) {
+                try {
+                    $gateway = Omnipay::create($order->payment_gateway->name);
+
+                    $gateway->initialize($order->account->getGateway($order->payment_gateway->id)->config);
+
+                    $refund_amount = $order->organiser_amount - $order->amount_refunded;
+
+                    $request = $gateway->refund([
+                        'transactionReference' => $order->transaction_id,
+                        'amount'               => $refund_amount,
+                        'refundApplicationFee' => floatval($order->booking_fee) > 0 ? true : false,
+                    ]);
+
+                    $response = $request->send();
+
+                    if ($response->isSuccessful()) {
+                        /* Update the event sales volume*/
+                        $order->event->decrement('sales_volume', $refund_amount);
+                        $order->amount_refunded = round(($order->amount_refunded + $refund_amount), 2);
+                        $order->is_refund_requested = false;
+                        if (($order->organiser_amount - $order->amount_refunded) == 0) {
+                            $order->is_refunded = 1;
+                            $order->order_status_id = config('attendize.order_refunded');
+                        } else {
+                            $order->is_partially_refunded = 1;
+                            $order->order_status_id = config('attendize.order_partially_refunded');
+                        }
+                    } else {
+                        $error_message = $response->getMessage();
+                    }
+                    $order->save();
+                } catch (\Exeption $e) {
+                    Log::error($e);
+                    $error_message = 'There has been a problem processing the refund request. Please check information and try again.';
+                }
+            }
+
+            if ($error_message) {
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => $error_message,
+                ]);
+            }
+        }
+
+        /*
+         * Cancel the attendees
+         */
+        $attendees = $order->attendees;
+        foreach ($attendees as $attendee) {
+            $attendee->ticket->decrement('quantity_sold');
+            $attendee->ticket->decrement('sales_volume', $attendee->ticket->price);
+            $order->event->decrement('sales_volume', $attendee->ticket->price);
+            $attendee->is_cancelled = 1;
+            $attendee->save();
+
+            $eventStats = EventStats::where('event_id', $attendee->event_id)->where('date', $attendee->created_at->format('Y-m-d'))->first();
+            if($eventStats){
+                $eventStats->decrement('tickets_sold',  1);
+                $eventStats->decrement('sales_volume',  $attendee->ticket->price);
+            }
+        }
+
+        $data = [
+            'order' => $order
+        ];
+
+        Mail::send('Emails.RefundRequestSuccess', $data, function ($message) use ($order) {
+            $message->to($order->email);
+            $message->subject('Your refund request for event ' . $order->event->title . ' [' . $order->order_reference . ']');
+        });
+
+        session()->flash('message', 'Successfully refunded.');
+
+        return response()->json([
+            'status'      => 'success',
+            'redirectUrl' => ''
+        ]);
+    }
+
+    public function denyRefundRequest(Request $request, $order_id)
+    {
+        $order = Order::scope()->findOrFail($order_id);
+
+        $order->is_refund_requested = false;
+        $order->update();
+
+        $data = [
+            'order' => $order
+        ];
+
+        Mail::send('Emails.RefundRequestDenied', $data, function ($message) use ($order) {
+            $message->to($order->email);
+            $message->subject('Your refund request for event ' . $order->event->title . ' [' . $order->order_reference . ']');
+        });
+
+        session()->flash('message', 'Refund request cancelled successfully.');
+
+        return response()->json([
+            'status'      => 'success',
+            'redirectUrl' => ''
+        ]);
+    }
 }
+

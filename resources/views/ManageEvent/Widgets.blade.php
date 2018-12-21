@@ -3,7 +3,7 @@
 @section('title')
 @parent
 
-@lang("Widgets.event_widgets")
+Event Widgets
 @stop
 
 @section('top_nav')
@@ -16,7 +16,7 @@
 
 @section('page_title')
 <i class='ico-code mr5'></i>
-@lang("Widgets.event_widgets")
+Event Surveys
 @stop
 
 @section('head')
@@ -40,19 +40,19 @@
             <div class="panel-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <h4>@lang("Widgets.html_embed_code")</h4>
+                        <h4>HTML Embed Code</h4>
                             <textarea rows="7" onfocus="this.select();"
                                       class="form-control">{{$event->embed_html_code}}</textarea>
                     </div>
                     <div class="col-md-6">
-                        <h4>@lang("Widgets.instructions")</h4>
+                        <h4>Instructions</h4>
 
                         <p>
-                            @lang("Widgets.instructions_text")
+                            Simply copy and paste the HTML provided into your website wherever you would like the widget to appear.
                         </p>
 
                         <h5>
-                            <b>@lang("Widgets.embed_preview")</b>
+                            <b>Embed Preview</b>
                         </h5>
 
                         <div class="preview_embed" style="border:1px solid #ddd; padding: 5px;">

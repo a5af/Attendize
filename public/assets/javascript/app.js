@@ -12,8 +12,7 @@ $(function () {
         var $div = $("<div>", {id: "DatePicker"});
         $("body").append($div);
         $div.DateTimePicker({
-            dateTimeFormat: Attendize.DateTimeFormat,
-            dateSeparator: Attendize.DateSeparator
+            dateTimeFormat: Attendize.DateTimeFormat
         });
 
     });
@@ -143,7 +142,6 @@ $(function () {
             $button = $(this);
 
         $('.modal').remove();
-        $('.modal-backdrop').remove();
         $('html').addClass('working');
 
         $.ajax({
@@ -174,7 +172,7 @@ $(function () {
             }
         }).done().fail(function (data) {
             $('html').removeClass('working');
-            showMessage(lang("whoops_and_error", {"code": data.status, "error": data.statusText}));
+            showMessage('Whoops!, something has gone wrong.<br><br>' + data.status + ' ' + data.statusText);
         });
 
         e.preventDefault();
@@ -424,6 +422,36 @@ $(function () {
         e.preventDefault();
     });
 
+    $(document.body).on('click', '.refundRequest', function (e) {
+        $(e.target).addClass('disabled')
+            .text('Working...');
+        var route = $(this).data('route');
+
+        $.get(route)
+            .done(function (data) {
+
+                if (typeof data.message !== 'undefined') {
+                    showMessage(data.message);
+                }
+
+                switch (data.status) {
+                    case 'success':
+                        document.location.reload();
+                        break;
+                    case 'error':
+                        /* Error */
+                        break;
+
+                    default:
+                        break;
+                }
+            }).fail(function (data) {
+            showMessage(Attendize.GenericErrorMessages);
+        });
+
+
+        e.preventDefault();
+    });
 
 });
 
@@ -457,7 +485,7 @@ function removeQuestionOption(removeBtn)
     if (tbody.find('tr').length > 1) {
         removeBtn.parents('tr').remove();
     } else {
-        alert(lang("at_least_one_option"));
+        alert('You must have at least one option.');
     }
 }
 
@@ -506,7 +534,7 @@ function toggleSubmitDisabled($submitButton) {
 }
 
 /**
- *
+ * 
  * @returns {{}}
  */
 $.fn.serializeObject = function()

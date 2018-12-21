@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>
-        @lang("Attendee.check_in", ["event"=>$event->title])
+        Check In: {{$event->title}}
     </title>
 
     {!! HTML::script('vendor/vue/dist/vue.min.js') !!}
@@ -49,7 +49,7 @@
                             'v-model' => 'searchTerm',
                             '@keyup' => 'fetchAttendees | debounce 500',
                             '@keyup.esc' => 'clearSearch',
-                            'placeholder' => trans("ManageEvent.checkin_search_placeholder")
+                            'placeholder' => 'Search by Attendee Name, Order Reference, Attendee Reference... '
                 ])  !!}
 
 
@@ -70,16 +70,17 @@
                 <div class="attendee_list">
                     <h4 class="attendees_title">
                         <span v-if="!searchTerm">
-                            @lang("ManageEvent.all_attendees")
+                            All Attendees
                         </span>
                         <span v-else v-cloak>
-                            @{{searchResultsCount}} @lang("ManageEvent.result_for") <b>@{{ searchTerm }}</b>
+                            @{{searchResultsCount}} @{{searchResultsCount | pluralize 'Result'}}
+                            for <b>@{{ searchTerm }}</b>
                         </span>
                     </h4>
 
                     <div style="margin: 10px;" v-if="searchResultsCount == 0 && searchTerm" class="alert alert-info"
                          v-cloak>
-                        @lang("ManageEvent.no_attendees_matching") <b>@{{ searchTerm }}</b>
+                        No Attendees matching <b>@{{ searchTerm }}</b>
                     </div>
 
                     <ul v-if="searchResultsCount > 0" class="list-group" id="attendee_list" v-cloak>
@@ -89,11 +90,11 @@
                         class="at list-group-item"
                         :class = "{arrived : attendee.has_arrived || attendee.has_arrived == '1'}"
                         >
-                            @lang("Attendee.name"): <b>@{{ attendee.first_name }} @{{ attendee.last_name }} </b> &nbsp; <span v-if="!attendee.is_payment_received" class="label label-danger">@lang("Order.awaiting_payment")</span>
+                        Name: <b>@{{ attendee.first_name }} @{{ attendee.last_name }} </b> &nbsp; <span v-if="!attendee.is_payment_received" class="label label-danger">Awaiting Payment</span>
                         <br>
-                            @lang("Order.reference"): <b>@{{ attendee.order_reference + '-' + attendee.reference_index }}</b>
+                        Reference: <b>@{{ attendee.order_reference + '-' + attendee.reference_index }}</b>
                         <br>
-                            @lang("Order.ticket"): <b>@{{ attendee.ticket }}</b>
+                        Ticket: <b>@{{ attendee.ticket }}</b>
                         <a href="" class="ci btn btn-successfulQrRead">
                             <i class="ico-checkmark"></i>
                         </a>
@@ -122,32 +123,27 @@
         <a @click="closeScanner"  class="closeScanner" href="javascript:void(0);">
         <i class="ico-close"></i>
         </a>
-        <video id="scannerVideo" playsinline autoplay></video>
+        <video id="scannerVideo" autoplay></video>
 
         <div class="scannerButtons">
                     <a @click="initScanner" v-show="!isScanning" href="javascript:void(0);">
-                    @lang("Attendee.scan_another_ticket")
+                    Scan another ticket
                     </a>
         </div>
         <div v-if="isScanning" class="scannerAimer">
         </div>
 
-        <div v-if="scanResult" class="scannerResult @{{ scanResultObject.status }}">
-            <i v-if="scanResultObject.status == 'success'" class="ico-checkmark"></i>
-            <i v-if="scanResultObject.status == 'error'" class="ico-close"></i>
+        <div v-if="scanResult" class="scannerResult @{{ scanResultType }}">
+            <i v-if="scanResultType == 'success'" class="ico-checkmark"></i>
+            <i v-if="scanResultType == 'error'" class="ico-close"></i>
         </div>
 
         <div class="ScanResultMessage">
-                    <span class="message" v-if="scanResultObject.status == 'error'">
-                        @{{ scanResultObject.message }}
+                    <span class="message" v-if="!isScanning">
+                        @{{{ scanResultMessage }}}
                     </span>
-                    <span class="message" v-if="scanResultObject.status == 'success'">
-                        <span class="uppercase">@lang("Attendee.name")</span>: @{{ scanResultObject.name }}<br>
-                        <span class="uppercase">@lang("Attendee.reference")</span>: @{{scanResultObject.reference }}<br>
-                        <span class="uppercase">@lang("Attendee.ticket")</span>: @{{scanResultObject.ticket }}
-                    </span>
-                    <span v-if="isScanning">
-                        <div id="scanning-ellipsis">@lang("Attendee.scanning")<span>.</span><span>.</span><span>.</span></div>
+                    <span v-else>
+                        <div id="scanning-ellipsis">Scanning<span>.</span><span>.</span><span>.</span></div>
                     </span>
         </div>
         <canvas id="QrCanvas" width="800" height="600"></canvas>
@@ -159,7 +155,6 @@
 Vue.http.headers.common['X-CSRF-TOKEN'] = '{{ csrf_token() }}';
 </script>
 
-@include("Shared.Partials.LangScript")
 {!! HTML::script('vendor/qrcode-scan/llqrcode.js') !!}
 {!! HTML::script('assets/javascript/check_in.js') !!}
 </body>

@@ -2,7 +2,7 @@
 
 @section('title')
     @parent
-    @lang("Ticket.event_tickets")
+    Event Tickets
 @stop
 
 @section('top_nav')
@@ -11,7 +11,7 @@
 
 @section('page_title')
     <i class="ico-ticket mr5"></i>
-    @lang("Ticket.event_tickets")
+    Event Tickets
 @stop
 
 @section('head')
@@ -36,7 +36,7 @@
                         showMessage(data.message);
                     },
                     error: function (data) {
-                        showMessage(lang("whoops2"));
+                        showMessage('Something went wrong. Please try again.');
                     }
                 });
             });
@@ -55,7 +55,7 @@
             <div class="btn-group btn-group-responsive">
                 <button data-modal-id='CreateTicket'
                         data-href="{{route('showCreateTicket', array('event_id'=>$event->id))}}"
-                        class='loadModal btn btn-success' type="button"><i class="ico-ticket"></i> @lang("Ticket.create_ticket")
+                        class='loadModal btn btn-success' type="button"><i class="ico-ticket"></i> Create Ticket
                 </button>
             </div>
             @if(false)
@@ -63,12 +63,12 @@
                     <button data-modal-id='TicketQuestions'
                             data-href="{{route('showTicketQuestions', array('event_id'=>$event->id))}}" type="button"
                             class="loadModal btn btn-success">
-                        <i class="ico-question"></i> @lang("Ticket.questions")
+                        <i class="ico-question"></i> Questions
                     </button>
                 </div>
                 <div class="btn-group btn-group-responsive">
                     <button type="button" class="btn btn-success">
-                        <i class="ico-tags"></i> @lang("Ticket.coupon_codes")
+                        <i class="ico-tags"></i> Coupon Codes
                     </button>
                 </div>
             @endif
@@ -78,7 +78,7 @@
     <div class="col-md-3">
         {!! Form::open(array('url' => route('showEventTickets', ['event_id'=>$event->id,'sort_by'=>$sort_by]), 'method' => 'get')) !!}
         <div class="input-group">
-            <input name='q' value="{{$q or ''}}" placeholder="@lang("Ticket.search_tickets")" type="text" class="form-control">
+            <input name='q' value="{{$q or ''}}" placeholder="Search Tickets.." type="text" class="form-control">
         <span class="input-group-btn">
             <button class="btn btn-default" type="submit"><i class="ico-search"></i></button>
         </span>
@@ -93,7 +93,7 @@
         <div class="row">
             <div class="col-md-3 col-xs-6">
                 <div class='order_options'>
-                    <span class="event_count">@lang("Ticket.n_tickets", ["num"=>$tickets->count()])</span>
+                    <span class="event_count">{{$tickets->count()}} tickets</span>
                 </div>
             </div>
             <div class="col-md-2 col-xs-6 col-md-offset-7">
@@ -115,14 +115,14 @@
                              class="panel-heading loadModal">
                             <h3 class="panel-title">
                                 @if($ticket->is_hidden)
-                                    <i title="@lang("Ticket.this_ticket_is_hidden")"
+                                    <i title="This ticket is hidden"
                                        class="ico-eye-blocked ticket_icon mr5 ellipsis"></i>
                                 @else
                                     <i class="ico-ticket ticket_icon mr5 ellipsis"></i>
                                 @endif
                                 {{$ticket->title}}
                                 <span class="pull-right">
-                        {{ ($ticket->is_free) ? trans("Order.free") : money($ticket->price, $event->currency) }}
+                        {{ ($ticket->is_free) ? "FREE" : money($ticket->price, $event->currency) }}
                     </span>
                             </h3>
                         </div>
@@ -132,32 +132,32 @@
                                     <div class="section">
                                         <h4 class="nm">{{ $ticket->quantity_sold }}</h4>
 
-                                        <p class="nm text-muted">@lang("Ticket.sold")</p>
+                                        <p class="nm text-muted">Sold</p>
                                     </div>
                                 </li>
                                 <li>
                                     <div class="section">
                                         <h4 class="nm">
-                                            {{ ($ticket->quantity_available === null) ? '∞' : $ticket->quantity_remaining }}
+                                            {{ ($ticket->quantity_available === null) ? '&infin;' : $ticket->quantity_remaining }}
                                         </h4>
 
-                                        <p class="nm text-muted">@lang("Ticket.remaining")</p>
+                                        <p class="nm text-muted">Remaining</p>
                                     </div>
                                 </li>
                                 <li>
                                     <div class="section">
                                         <h4 class="nm hint--top"
-                                            title="{{money($ticket->sales_volume, $event->currency)}} + {{money($ticket->organiser_fees_volume, $event->currency)}} @lang("Order.organiser_booking_fees")">
+                                            title="{{money($ticket->sales_volume, $event->currency)}} + {{money($ticket->organiser_fees_volume, $event->currency)}} Organiser Booking Fees">
                                             {{money($ticket->sales_volume + $ticket->organiser_fees_volume, $event->currency)}}
-                                            <sub title="@lang("Ticket.doesnt_account_for_refunds").">*</sub>
+                                            <sub title="Doesn't account for refunds.">*</sub>
                                         </h4>
-                                        <p class="nm text-muted">@lang("Ticket.revenue")</p>
+                                        <p class="nm text-muted">Revenue</p>
                                     </div>
                                 </li>
                             </ul>
                         </div>
                         <div class="panel-footer" style="height: 56px;">
-                            <div class="sortHandle" title="@lang("basic.drag_to_reorder")">
+                            <div class="sortHandle" title="Drag to re-order">
                                 <i class="ico-paragraph-justify"></i>
                             </div>
                             <ul class="nav nav-section nav-justified">
@@ -165,18 +165,18 @@
                                     <a href="javascript:void(0);">
                                         @if($ticket->sale_status === config('attendize.ticket_status_on_sale'))
                                             @if($ticket->is_paused)
-                                                @lang("Ticket.ticket_sales_paused") &nbsp;
+                                                Ticket Sales Paused &nbsp;
                                                 <span class="pauseTicketSales label label-info"
                                                       data-id="{{$ticket->id}}"
                                                       data-route="{{route('postPauseTicket', ['event_id'=>$event->id])}}">
-                                    <i class="ico-play4"></i> @lang("Ticket.resume")
+                                    <i class="ico-play4"></i> Resume
                                 </span>
                                             @else
-                                                @lang("Ticket.on_sale") &nbsp;
+                                                On Sale &nbsp;
                                                 <span class="pauseTicketSales label label-info"
                                                       data-id="{{$ticket->id}}"
                                                       data-route="{{route('postPauseTicket', ['event_id'=>$event->id])}}">
-                                    <i class="ico-pause"></i> @lang("Ticket.pause")
+                                    <i class="ico-pause"></i> Pause
                                 </span>
                                             @endif
                                         @else

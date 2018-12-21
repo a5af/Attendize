@@ -1,8 +1,8 @@
 @extends('Shared.Layouts.Master')
 
 @section('title')
-@parent <?php /*Seems like unfinished page, but only 2 variables, so translating*/ ?>
-@lang("Event.promote_event")
+@parent
+Promote Event
 @stop
 
 @section('top_nav')
@@ -16,7 +16,7 @@
 
 @section('page_title')
 <i class="ico-bullhorn mr5"></i>
-@lang("Event.promote_event")
+Promote Event
 @stop
 
 
@@ -24,7 +24,7 @@
 <div class='row'>
     <div class="col-md-12">
         <h1>
-            @lang("Event.promote")
+            Promote
             <pre>
                 [PROMOTE PAGE]
             </pre>

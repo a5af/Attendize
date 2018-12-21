@@ -1,6 +1,6 @@
 <?php
 
-Route::group(['prefix' => 'api', 'middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'api', 'middleware' => 'auth'], function () {
 
     /*
      * ---------------
@@ -36,19 +36,12 @@ Route::group(['prefix' => 'api', 'middleware' => 'auth:api'], function () {
      * Users
      * ---------------
      */
+    Route::post('/users', 'API\UsersApiController@store');
 
     /*
      * ---------------
      * Check-In / Check-Out
      * ---------------
      */
-
-
-    Route::get('/', function () {
-        return response()->json([
-            'Hello' => Auth::guard('api')->user()->full_name . '!'
-        ]);
-    });
-
 
 });

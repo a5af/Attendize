@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ Lang::locale() }}">
+<html>
 <head>
     <!--
               _   _                 _ _
@@ -12,7 +12,7 @@
     -->
     <title>
         @section('title')
-            Attendize -
+            Attendize ::
         @show
     </title>
 
@@ -50,17 +50,18 @@
 
                 <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">
                     <span class="meta">
-                        <span class="text ">{{isset($organiser->name) ? $organiser->name : $event->organiser->name}}</span>
+                        <span class="text ">{{Auth::user()->first_name}}</span>
                         <span class="arrow"></span>
                     </span>
                 </a>
 
 
                 <ul class="dropdown-menu" role="menu">
+                    @role('owner')
                     <li>
                         <a href="{{route('showCreateOrganiser')}}">
                             <i class="ico ico-plus"></i>
-                            @lang("Top.create_organiser")
+                            Create Organiser
                         </a>
                     </li>
                     @foreach($organisers as $org)
@@ -73,20 +74,22 @@
                         </li>
                     @endforeach
                     <li class="divider"></li>
+                    @endrole
 
                     <li>
                         <a data-href="{{route('showEditUser')}}" data-modal-id="EditUser"
-                           class="loadModal editUserModal" href="javascript:void(0);"><span class="icon ico-user"></span>@lang("Top.my_profile")</a>
+                           class="loadModal editUserModal" href="javascript:void(0);"><span class="icon ico-user"></span>My Profile</a>
                     </li>
+                    @role('owner')
                     <li class="divider"></li>
                     <li><a data-href="{{route('showEditAccount')}}" data-modal-id="EditAccount" class="loadModal"
-                           href="javascript:void(0);"><span class="icon ico-cog"></span>@lang("Top.account_settings")</a></li>
-
+                           href="javascript:void(0);"><span class="icon ico-cog"></span>Account Settings</a></li>
+                    @endrole
 
                     <li class="divider"></li>
-                    <li><a target="_blank" href="https://www.attendize.com/feedback.php?v={{ config('attendize.version') }}"><span class="icon ico-megaphone"></span>@lang("Top.feedback_bug_report")</a></li>
+                    <li><a target="_blank" href="https://www.attendize.com/feedback.php?v={{ config('attendize.version') }}"><span class="icon ico-megaphone"></span>Feedback / Bug Report</a></li>
                     <li class="divider"></li>
-                    <li><a href="{{route('logout')}}"><span class="icon ico-exit"></span>@lang("Top.sign_out")</a></li>
+                    <li><a href="{{route('logout')}}"><span class="icon ico-exit"></span>Sign Out</a></li>
                 </ul>
             </li>
         </ul>
@@ -124,13 +127,12 @@
 <!--/Main Content-->
 
 <!--JS-->
-@include("Shared.Partials.LangScript")
 {!! HTML::script('assets/javascript/backend.js') !!}
 <script>
     $(function () {
         $.ajaxSetup({
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="_token"]').attr('content')
+                'X-CSRF-Token': "<?php echo csrf_token() ?>"
             }
         });
     });

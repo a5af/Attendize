@@ -40,9 +40,8 @@
         </div>
 
         <a href="#intro" style="display:none;" class="totop"><i class="ico-angle-up"></i>
-            <span style="font-size:11px;">@lang("basic.TOP")</span></a>
+            <span style="font-size:11px;">TOP</span></a>
 
-        @include("Shared.Partials.LangScript")
         {!!HTML::script('assets/javascript/frontend.js')!!}
 
         @include('Shared.Partials.GlobalFooterJS')

@@ -1,7 +1,7 @@
 @extends('Shared.Layouts.MasterWithoutMenus')
 
 @section('title')
-    @lang("Organiser.create_organiser")
+    Create Organiser
 @stop
 
 @section('head')
@@ -12,10 +12,6 @@
             text-shadow: none !important;;
         }
     </style>
-    <script>
-    @include('ManageOrganiser.Partials.OrganiserCreateAndEditJS')
-    </script>
-
 @stop
 
 @section('content')
@@ -26,19 +22,19 @@
                     <div class="logo">
                         {!!HTML::image('assets/images/logo-dark.png')!!}
                     </div>
-                    <h2>@lang("Organiser.create_organiser")</h2>
+                    <h2>Create Organiser</h2>
 
                     {!! Form::open(array('url' => route('postCreateOrganiser'), 'class' => 'ajax')) !!}
                     @if(@$_GET['first_run'] == '1')
                         <div class="alert alert-info">
-                            @lang("Organiser.create_organiser_text")
+                            Before you create events you'll need to create an organiser. An organiser is simply whoever is organising the event. It can be anyone, from a person to an organisation.
                         </div>
                     @endif
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                {!! Form::label('name', trans("Organiser.organiser_name"), array('class'=>'required control-label ')) !!}
+                                {!! Form::label('name', 'Organiser Name', array('class'=>'required control-label ')) !!}
                                 {!!  Form::text('name', Input::old('name'),
                                             array(
                                             'class'=>'form-control'
@@ -47,80 +43,53 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                {!! Form::label('email', trans("Organiser.organiser_email"), array('class'=>'control-label required')) !!}
+                                {!! Form::label('email', 'Organiser Email', array('class'=>'control-label required')) !!}
                                 {!!  Form::text('email', Input::old('email'),
                                             array(
                                             'class'=>'form-control ',
-                                            'placeholder'=>trans("Organiser.organiser_email_placeholder")
+                                            'placeholder'=>''
                                             ))  !!}
                             </div>
                         </div>
                     </div>
+
+
+
+
                     <div class="form-group">
-                        {!! Form::label('about', trans("Organiser.organiser_description"), array('class'=>'control-label ')) !!}
+                        {!! Form::label('about', 'Organiser Description', array('class'=>'control-label ')) !!}
                         {!!  Form::textarea('about', Input::old('about'),
                                     array(
                                     'class'=>'form-control ',
-                                    'placeholder'=>trans("Organiser.organiser_description_placeholder"),
+                                    'placeholder'=>'',
                                     'rows' => 4
                                     ))  !!}
                     </div>
-                    <div class="form-group">
-                        <p class="control-label">{!! trans("Organiser.organiser_tax_prompt") !!}</p>
-                        {!! Form::label('Yes', 'Yes', array('class'=>'control-label', 'id' => 'charge_yes')) !!}
-                        {{ Form::radio('charge_tax', '1' , false) }}
-                        {!! Form::label('No', 'No', array('class'=>'control-label','id' => 'charge_no')) !!}
-                        {{ Form::radio('charge_tax', '0' , true) }}
-                    </div>
-
-                    <div id="tax_fields" class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                {!! Form::label('tax_id', trans("Organiser.organiser_tax_id"), array('class'=>'control-label required')) !!}
-                                {!! Form::text('tax_id', Input::old('tax_id'), array('class'=>'form-control', 'placeholder'=>'Tax ID'))  !!}
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                {!! Form::label('tax_name', trans("Organiser.organiser_tax_name"), array('class'=>'control-label required')) !!}
-                                {!! Form::text('tax_name', Input::old('tax_name'), array('class'=>'form-control', 'placeholder'=>'Tax name'))  !!}
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                {!! Form::label('tax_value', trans("Organiser.organiser_tax_value"), array('class'=>'control-label required')) !!}
-                                {!! Form::text('tax_value', Input::old('tax_value'), array('class'=>'form-control', 'placeholder'=>'Tax Value'))  !!}
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                {!! Form::label('facebook', trans("Organiser.organiser_facebook"), array('class'=>'control-label ')) !!}
+                                {!! Form::label('facebook', 'Organiser Facebook', array('class'=>'control-label ')) !!}
 
                                 <div class="input-group">
                                     <span style="background-color: #eee;" class="input-group-addon">facebook.com/</span>
                                     {!!  Form::text('facebook', Input::old('facebook'),
                                                     array(
                                                     'class'=>'form-control ',
-                                                    'placeholder'=>trans("Organiser.organiser_username_facebook_placeholder")
+                                                    'placeholder'=>'Username'
                                                     ))  !!}
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                {!! Form::label('twitter', trans("Organiser.organiser_twitter"), array('class'=>'control-label ')) !!}
+                                {!! Form::label('twitter', 'Organiser Twitter', array('class'=>'control-label ')) !!}
 
                                 <div class="input-group">
                                     <span style="background-color: #eee;" class="input-group-addon">twitter.com/</span>
                                     {!!  Form::text('twitter', Input::old('twitter'),
                                              array(
                                              'class'=>'form-control ',
-                                                    'placeholder'=>trans("Organiser.organiser_username_twitter_placeholder")
+                                             'placeholder'=>'Username'
                                              ))  !!}
                                 </div>
                             </div>
@@ -128,14 +97,15 @@
                     </div>
 
                     <div class="form-group">
-                        {!! Form::label('organiser_logo', trans("Organiser.organiser_logo"), array('class'=>'control-label ')) !!}
+                        {!! Form::label('organiser_logo', 'Organiser Logo', array('class'=>'control-label ')) !!}
                         {!! Form::styledFile('organiser_logo') !!}
                     </div>
 
-                    {!! Form::submit(trans("Organiser.create_organiser"), ['class'=>" btn-block btn btn-success"]) !!}
+                    {!! Form::submit('Create Organiser', ['class'=>" btn-block btn btn-success"]) !!}
                     {!! Form::close() !!}
                 </div>
             </div>
         </div>
     </div>
 @stop
+

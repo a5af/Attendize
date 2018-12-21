@@ -124,27 +124,16 @@ $factory->define(App\Models\User::class, function (Faker\Generator $faker) {
 
 $factory->define(App\Models\Organiser::class, function (Faker\Generator $faker) {
     return [
-        'account_id'                => factory(App\Models\Account::class)->create()->id,
-        'name'                      => $faker->name,
-        'about'                     => $faker->text,
-        'email'                     => $faker->email,
-        'phone'                     => $faker->phoneNumber,
-        'facebook'                  => 'https://facebook.com/organizer-profile',
-        'twitter'                   => 'https://twitter.com/organizer-profile',
-        'logo_path'                 => 'path/to/logo',
-        'is_email_confirmed'        => 0,
-        'confirmation_key'          => str_random(15),
-        'show_twitter_widget'       => $faker->boolean,
-        'show_facebook_widget'      => $faker->boolean,
-        'page_header_bg_color'      => $faker->hexcolor,
-        'page_bg_color'             => '#ffffff',
-        'page_text_color'           => '#000000',
-        'enable_organiser_page'     => $faker->boolean,
-        'google_analytics_code'     => null,
-        'tax_name'                  => $faker->text(11) . ' tax',
-        'tax_value'                 => $faker->randomFloat(2, 0, 30),
-        'tax_id'                    => $faker->randomDigitNotNull,
-        'charge_tax'                => $faker->boolean
+        'account_id'         => factory(App\Models\Account::class)->create()->id,
+        'name'               => $faker->name,
+        'about'              => $faker->text,
+        'email'              => $faker->email,
+        'phone'              => $faker->phoneNumber,
+        'facebook'           => 'https://facebook.com/organizer-profile',
+        'twitter'            => 'https://twitter.com/organizer-profile',
+        'logo_path'          => 'path/to/logo',
+        'is_email_confirmed' => 0,
+        'confirmation_key'   => str_random(15),
     ];
 });
 
@@ -201,8 +190,8 @@ $factory->define(App\Models\Order::class, function (Faker\Generator $faker) {
         'last_name'             => $faker->lastName,
         'email'                 => $faker->email,
         'ticket_pdf_path'       => '/ticket/pdf/path',
-        'order_reference'       => $faker->text(15),
-        'transaction_id'        => $faker->text(50),
+        'order_reference'       => $faker->text,
+        'transaction_id'        => $faker->text,
         'discount'              => .20,
         'booking_fee'           => .10,
         'organiser_booking_fee' => .10,
@@ -214,10 +203,7 @@ $factory->define(App\Models\Order::class, function (Faker\Generator $faker) {
         'is_refunded'           => 0,
         'amount'                => 20.00,
         'amount_refunded'       => 0,
-        'event_id'              => factory(App\Models\Event::class)->create()->id,
-        'payment_gateway_id'    => 1,
-        'is_payment_received'   => false,
-        'taxamt'                => 0
+        'event_id'              => factory(App\Models\Event::class)->create()->id
     ];
 });
 
@@ -227,7 +213,7 @@ $factory->define(App\Models\Ticket::class, function (Faker\Generator $faker) {
         'user_id'               => factory(App\Models\User::class)->create()->id,
         'edited_by_user_id'     => factory(App\Models\User::class)->create()->id,
         'account_id'            => factory(App\Models\Account::class)->create()->id,
-        'order_id'              => factory(App\Models\Order::class)->create()->id,
+        'order_id'              => factory(App\Models\OrderStatus::class)->create()->id,
         'event_id'              => factory(App\Models\Event::class)->create()->id,
         'title'                 => $faker->name,
         'description'           => $faker->text,
@@ -240,10 +226,7 @@ $factory->define(App\Models\Ticket::class, function (Faker\Generator $faker) {
         'end_sale_date'         => Carbon::now()->addDays(20),
         'sales_volume'          => 0,
         'organiser_fees_volume' => 0,
-        'is_paused'             => 0,
-        'public_id'             => null,
-        'sort_order'            => 0,
-        'is_hidden'             => false
+        'is_paused'             => 0
     ];
 });
 
@@ -281,7 +264,6 @@ $factory->define(App\Models\Attendee::class, function (Faker\Generator $faker) {
         'reference_index'          => $faker->numberBetween(),
         'private_reference_number' => 1,
         'is_cancelled'             => false,
-        'is_refunded'              => false,
         'has_arrived'              => false,
         'arrival_time'             => Carbon::now(),
         'account_id'               => factory(App\Models\Account::class)->create()->id,
@@ -304,3 +286,4 @@ $factory->define(App\Models\EventImage::class, function (Faker\Generator $faker)
         'user_id'    => factory(App\Models\User::class)->create()->id
     ];
 });
+

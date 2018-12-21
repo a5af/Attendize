@@ -5,6 +5,7 @@ namespace app\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Account;
 
 class ApiBaseController extends Controller
 {
@@ -12,7 +13,8 @@ class ApiBaseController extends Controller
 
     public function __construct()
     {
-        $this->account_id = Auth::guard('api')->user()->account_id;
+        $account = Account::take(1)->get();
+        $this->account_id = $account[0]->id;
     }
 
 

@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\EventImage;
 use App\Models\Organiser;
 use Auth;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Image;
 use Log;
@@ -23,7 +24,7 @@ class EventController extends MyBaseController
     {
         $data = [
             'modal_id'     => $request->get('modal_id'),
-            'organisers'   => Organiser::scope()->pluck('name', 'id'),
+            'organisers'   => Organiser::scope()->lists('name', 'id'),
             'organiser_id' => $request->get('organiser_id') ? $request->get('organiser_id') : false,
         ];
 
@@ -49,7 +50,8 @@ class EventController extends MyBaseController
 
         $event->title = $request->get('title');
         $event->description = strip_tags($request->get('description'));
-        $event->start_date = $request->get('start_date');
+        $event->start_date = $request->get('start_date') ? Carbon::createFromFormat('d-m-Y H:i',
+            $request->get('start_date')) : null;
 
         /*
          * Venue location info (Usually auto-filled from google maps)
@@ -81,7 +83,8 @@ class EventController extends MyBaseController
             $event->location_is_manual = 1;
         }
 
-        $event->end_date = $request->get('end_date');
+        $event->end_date = $request->get('end_date') ? Carbon::createFromFormat('d-m-Y H:i',
+            $request->get('end_date')) : null;
 
         $event->currency_id = Auth::user()->account->currency_id;
         //$event->timezone_id = Auth::user()->account->timezone_id;
@@ -100,7 +103,7 @@ class EventController extends MyBaseController
                 'organiser_email' => ['required', 'email'],
             ];
             $messages = [
-                'organiser_name.required' => trans("Controllers.no_organiser_name_error"),
+                'organiser_name.required' => 'You must give a name for the event organiser.',
             ];
 
             $validator = Validator::make($request->all(), $rules, $messages);
@@ -119,12 +122,13 @@ class EventController extends MyBaseController
             $organiser->twitter = $request->get('organiser_twitter');
             $organiser->save();
             $event->organiser_id = $organiser->id;
+
         } elseif ($request->get('organiser_id')) {
             $event->organiser_id = $request->get('organiser_id');
         } else { /* Somethings gone horribly wrong */
             return response()->json([
                 'status'   => 'error',
-                'messages' => trans("Controllers.organiser_other_error"),
+                'messages' => 'There was an issue finding the organiser.',
             ]);
         }
 
@@ -161,7 +165,7 @@ class EventController extends MyBaseController
 
             return response()->json([
                 'status'   => 'error',
-                'messages' => trans("Controllers.event_create_exception"),
+                'messages' => 'Whoops! There was a problem creating your event. Please try again.',
             ]);
         }
 
@@ -222,7 +226,8 @@ class EventController extends MyBaseController
         $event->is_live = $request->get('is_live');
         $event->title = $request->get('title');
         $event->description = strip_tags($request->get('description'));
-        $event->start_date = $request->get('start_date');
+        $event->start_date = $request->get('start_date') ? Carbon::createFromFormat('d-m-Y H:i',
+            $request->get('start_date')) : null;
 
         /*
          * If the google place ID is the same as before then don't update the venue
@@ -263,7 +268,8 @@ class EventController extends MyBaseController
             }
         }
 
-        $event->end_date = $request->get('end_date');
+        $event->end_date = $request->get('end_date') ? Carbon::createFromFormat('d-m-Y H:i',
+            $request->get('end_date')) : null;
 
         if ($request->get('remove_current_image') == '1') {
             EventImage::where('event_id', '=', $event->id)->delete();
@@ -301,7 +307,7 @@ class EventController extends MyBaseController
         return response()->json([
             'status'      => 'success',
             'id'          => $event->id,
-            'message'     => trans("Controllers.event_successfully_updated"),
+            'message'     => 'Event Successfully Updated',
             'redirectUrl' => '',
         ]);
     }
@@ -336,7 +342,7 @@ class EventController extends MyBaseController
             }
 
             return response()->json([
-                'error' => trans("Controllers.image_upload_error"),
+                'error' => 'There was a problem uploading your image.',
             ]);
         }
     }

@@ -29,9 +29,9 @@ class ManageAccountController extends MyBaseController
     {
         $data = [
             'account'                  => Account::find(Auth::user()->account_id),
-            'timezones'                => Timezone::pluck('location', 'id'),
-            'currencies'               => Currency::pluck('title', 'id'),
-            'payment_gateways'         => PaymentGateway::pluck('provider_name', 'id'),
+            'timezones'                => Timezone::lists('location', 'id'),
+            'currencies'               => Currency::lists('title', 'id'),
+            'payment_gateways'         => PaymentGateway::lists('provider_name', 'id'),
             'account_payment_gateways' => AccountPaymentGateway::scope()->get(),
             'version_info'             => $this->getVersionInfo(),
         ];
@@ -42,7 +42,7 @@ class ManageAccountController extends MyBaseController
 
     public function showStripeReturn()
     {
-        $error_message = trans("Controllers.stripe_error");
+        $error_message = 'There was an error connecting your Stripe account. Please try again.';
 
         if (Input::get('error') || !Input::get('code')) {
             \Session::flash('message', $error_message);
@@ -79,7 +79,7 @@ class ManageAccountController extends MyBaseController
 
         $account->save();
 
-        \Session::flash('message', trans("Controllers.stripe_success"));
+        \Session::flash('message', 'You have successfully connected your Stripe account.');
 
         return redirect()->route('showEventsDashboard');
     }
@@ -111,7 +111,7 @@ class ManageAccountController extends MyBaseController
         return response()->json([
             'status'  => 'success',
             'id'      => $account->id,
-            'message' => trans("Controllers.account_successfully_updated"),
+            'message' => 'Account Successfully Updated',
         ]);
     }
 
@@ -157,7 +157,7 @@ class ManageAccountController extends MyBaseController
         return response()->json([
             'status'  => 'success',
             'id'      => $account_payment_gateway->id,
-            'message' => trans("Controllers.payment_information_successfully_updated"),
+            'message' => 'Payment Information Successfully Updated',
         ]);
     }
 
@@ -173,9 +173,9 @@ class ManageAccountController extends MyBaseController
         ];
 
         $messages = [
-            'email.email'    => trans("Controllers.error.email.email"),
-            'email.required' => trans("Controllers.error.email.required"),
-            'email.unique'   => trans("Controllers.error.email.unique"),
+            'email.email'    => 'Please enter a valid E-mail address.',
+            'email.required' => 'E-mail address is required.',
+            'email.unique'   => 'E-mail already in use for this account.',
         ];
 
         $validation = Validator::make(Input::all(), $rules, $messages);
@@ -205,12 +205,12 @@ class ManageAccountController extends MyBaseController
 
         Mail::send('Emails.inviteUser', $data, function ($message) use ($data) {
             $message->to($data['user']->email)
-                ->subject(trans("Email.invite_user", ["name"=>$data['inviter']->first_name . ' ' . $data['inviter']->last_name, "app"=>config('attendize.app_name')]));
+                ->subject($data['inviter']->first_name . ' ' . $data['inviter']->last_name . ' added you to an ' . config('attendize.app_name') . ' account.');
         });
 
         return response()->json([
             'status'  => 'success',
-            'message' => trans("Controllers.success_name_has_received_instruction", ["name"=>$user->email]),
+            'message' => 'Success! <b>' . $user->email . '</b> has been sent further instructions.',
         ]);
     }
 

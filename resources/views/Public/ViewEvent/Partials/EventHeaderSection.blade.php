@@ -1,13 +1,9 @@
 @if(!$event->is_live)
 <section id="goLiveBar">
     <div class="container">
-        @if(!$event->is_live)
-
-        {{ @trans("ManageEvent.event_not_live") }}
-        <a href="{{ route('MakeEventLive' , ['event_id' => $event->id]) }}"
-           style="background-color: green; border-color: green;"
-        class="btn btn-success btn-xs">{{ @trans("ManageEvent.publish_it") }}</a>
-        @endif
+                @if(!$event->is_live)
+                This event is not visible to the public - <a style="background-color: green; border-color: green;" class="btn btn-success btn-xs" href="{{route('MakeEventLive' , ['event_id' => $event->id])}}" >Publish Event</a>
+                @endif
     </div>
 </section>
 @endif
@@ -16,7 +12,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div onclick="window.location='{{$event->event_url}}#organiser'" class="event_organizer">
-                    <b>{{$event->organiser->name}}</b> @lang("Public_ViewEvent.presents")
+                    <b>{{$event->organiser->name}}</b> Presents
                 </div>
             </div>
         </div>
@@ -28,17 +24,17 @@
             <h1 property="name">{{$event->title}}</h1>
             <div class="event_venue">
                 <span property="startDate" content="{{ $event->start_date->toIso8601String() }}">
-                    {{ $event->startDateFormatted() }}
+                    {{ $event->start_date->format('D d M H:i A') }}
                 </span>
                 -
                 <span property="endDate" content="{{ $event->end_date->toIso8601String() }}">
-                     @if($event->start_date->diffInDays($event->end_date) == 0)
-                        {{ $event->end_date->format('H:i') }}
+                     @if($event->start_date->diffInHours($event->end_date) <= 12)
+                        {{ $event->end_date->format('H:i A') }}
                      @else
-                        {{ $event->endDateFormatted() }}
+                        {{ $event->end_date->format('D d M H:i A') }}
                      @endif
                 </span>
-                @lang("Public_ViewEvent.at")
+                @
                 <span property="location" typeof="Place">
                     <b property="name">{{$event->venue_name}}</b>
                     <meta property="address" content="{{ urldecode($event->venue_name) }}">
@@ -48,13 +44,13 @@
             <div class="event_buttons">
                 <div class="row">
                     <div class="col-md-4 col-sm-4">
-                        <a class="btn btn-event-link btn-lg" href="{{{$event->event_url}}}#tickets">@lang("Public_ViewEvent.TICKETS")</a>
+                        <a class="btn btn-event-link btn-lg" href="{{{$event->event_url}}}#tickets">TICKETS</a>
                     </div>
                     <div class="col-md-4 col-sm-4">
-                        <a class="btn btn-event-link btn-lg" href="{{{$event->event_url}}}#details">@lang("Public_ViewEvent.DETAILS")</a>
+                        <a class="btn btn-event-link btn-lg" href="{{{$event->event_url}}}#details">DETAILS</a>
                     </div>
                     <div class="col-md-4 col-sm-4">
-                        <a class="btn btn-event-link btn-lg" href="{{{$event->event_url}}}#location">@lang("Public_ViewEvent.LOCATION")</a>
+                        <a class="btn btn-event-link btn-lg" href="{{{$event->event_url}}}#location">LOCATION</a>
                     </div>
                 </div>
             </div>

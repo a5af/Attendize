@@ -99,11 +99,11 @@ class EventSurveyController extends MyBaseController
 
         $event->questions()->attach($question->id);
 
-        session()->flash('message', trans("Controllers.successfully_created_question"));
+        session()->flash('message', 'Successfully Created Question');
 
         return response()->json([
             'status'      => 'success',
-            'message'     => trans("Controllers.refreshing"),
+            'message'     => 'Refreshing..',
             'redirectUrl' => '',
         ]);
     }
@@ -178,11 +178,11 @@ class EventSurveyController extends MyBaseController
 
         $question->tickets()->sync($ticket_ids);
 
-        session()->flash('message', trans("Controllers.successfully_edited_question"));
+        session()->flash('message', 'Successfully Edited Question');
 
         return response()->json([
             'status'      => 'success',
-            'message'     => trans("Controllers.refreshing"),
+            'message'     => 'Refreshing..',
             'redirectUrl' => '',
         ]);
 
@@ -205,11 +205,11 @@ class EventSurveyController extends MyBaseController
 
         if ($question->delete()) {
 
-            session()->flash('message', trans("Controllers.successfully_deleted_question"));
+            session()->flash('message', 'Question Successfully Deleted');
 
             return response()->json([
                 'status'      => 'success',
-                'message'     => trans("Controllers.refreshing"),
+                'message'     => 'Refreshing..',
                 'redirectUrl' => '',
             ]);
         }
@@ -217,7 +217,7 @@ class EventSurveyController extends MyBaseController
         return response()->json([
             'status'  => 'error',
             'id'      => $question->id,
-            'message' => trans("Controllers.this_question_cant_be_deleted"),
+            'message' => 'This question can\'t be deleted.',
         ]);
     }
 
@@ -259,7 +259,7 @@ class EventSurveyController extends MyBaseController
     {
         Excel::create('answers-as-of-' . date('d-m-Y-g.i.a'), function ($excel) use ($event_id) {
 
-            $excel->setTitle(trans("Controllers.survey_answers"));
+            $excel->setTitle('Survey Answers');
 
             // Chain the setters
             $excel->setCreator(config('attendize.app_name'))
@@ -296,7 +296,7 @@ class EventSurveyController extends MyBaseController
         if ($question->save()) {
             return response()->json([
                 'status'  => 'success',
-                'message' => trans("Controllers.successfully_updated_question"),
+                'message' => 'Question Successfully Updated',
                 'id'      => $question->id,
             ]);
         }
@@ -304,7 +304,7 @@ class EventSurveyController extends MyBaseController
         return response()->json([
             'status'  => 'error',
             'id'      => $question->id,
-            'message' => trans("basic.whoops"),
+            'message' => 'Whoops! Looks like something went wrong. Please try again.',
         ]);
     }
 
@@ -329,7 +329,7 @@ class EventSurveyController extends MyBaseController
 
         return response()->json([
             'status'  => 'success',
-            'message' => trans("Controllers.successfully_updated_question_order"),
+            'message' => 'Question Order Successfully Updated',
         ]);
     }
 }

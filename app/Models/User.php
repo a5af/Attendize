@@ -2,18 +2,20 @@
 
 namespace App\Models;
 
-use App\Notifications\UserResetPassword;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Notifications\Notifiable;
+use Zizaco\Entrust\Traits\EntrustUserTrait;
 
 class User extends Model implements AuthenticatableContract, CanResetPasswordContract
 {
-    use Authenticatable, CanResetPassword, SoftDeletes, Notifiable;
+    use Authenticatable;
+    use EntrustUserTrait { restore as private restoreA; }
+    use CanResetPassword { restore as private restoreB; }
+    use SoftDeletes { restore as private restoreC; }
 
     /**
      * The database table used by the model.
@@ -73,6 +75,15 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
     public function activity()
     {
         return $this->hasMany(\App\Models\Activity::class);
+    }
+
+    /**
+     * The attendee associated with the user
+     */
+
+    public function attendee()
+    {
+        return $this->hasMany(\App\Models\Attendee::class);
     }
 
     /**
@@ -158,14 +169,10 @@ class User extends Model implements AuthenticatableContract, CanResetPasswordCon
         });
     }
 
-    /**
-     * Send the password reset notification.
-     *
-     * @param  string  $token
-     * @return void
-     */
-    public function sendPasswordResetNotification($token)
+    public function restore()
     {
-        $this->notify(new UserResetPassword($token));
+        $this->restoreA();
+        $this->restoreB();
+        $this->restoreC();
     }
 }

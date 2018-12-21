@@ -7,20 +7,17 @@ return [
     'ticket_status_sold_out'        => 1,
     'ticket_status_after_sale_date' => 2,//
     'enable_test_payments'          => env('ENABLE_TEST_PAYMENTS', false),
-    'enable_dummy_payment_gateway'  => false,
-    'payment_gateway_dummy'    => 0,
+
     'payment_gateway_stripe'   => 1,
     'payment_gateway_paypal'   => 2,
-    'fake_card_data' => [
-        'number' => '4242424242424242',
-        'expiryMonth' => '6',
-        'expiryYear' => '2030',
-        'cvv' => '123'
-    ],
+    'payment_gateway_coinbase' => 3,
+	'payment_gateway_migs'     => 4,
+
     'outgoing_email_noreply' => env('MAIL_FROM_ADDRESS'),
     'outgoing_email'         => env('MAIL_FROM_ADDRESS'),
     'outgoing_email_name'    => env('MAIL_FROM_NAME'),
     'incoming_email'         => env('MAIL_FROM_ADDRESS'),
+    'corp_email'             => env('CORP_EMAIL'),
 
     'app_name'               => 'Attendize Event Ticketing',
     'event_default_bg_color' => '#B23333',
@@ -34,7 +31,7 @@ return [
     'fallback_organiser_logo_url' => '/assets/images/logo-dark.png',
     'cdn_url'                     => '',
 
-    'checkout_timeout_after' => env('CHECKOUT_TIMEOUT_AFTER', 30), #minutes
+    'checkout_timeout_after' => env('CHECKOUT_TIMEOUT_AFTER', 10), #minutes
 
     'ticket_status_before_sale_date' => 3,
     'ticket_status_on_sale'          => 4,
@@ -59,11 +56,11 @@ return [
     'question_radio_single'         => 6,
 
 
-    'default_timezone'           => 30, #Europe/Dublin
-    'default_currency'           => 2, #Euro
-    'default_date_picker_format' => env('DEFAULT_DATEPICKER_FORMAT', 'yyyy-MM-dd HH:mm'),
-    'default_date_picker_seperator' => env('DEFAULT_DATEPICKER_SEPERATOR', '-'),
-    'default_datetime_format'    => env('DEFAULT_DATETIME_FORMAT', 'Y-m-d H:i'),
+    'default_timezone'           => 15, #US/EST
+    'default_currency'           => 1, # US Dollar
+    'default_date_format'        => 'j M, Y',
+    'default_date_picker_format' => 'd M, yyyy',
+    'default_datetime_format'    => 'F j, Y, g:i a',
     'default_query_cache'        => 120, #Minutes
     'default_locale'             => 'en',
     'default_payment_gateway'    => 1, #Stripe=1 Paypal=2 BitPay=3 MIGS=4

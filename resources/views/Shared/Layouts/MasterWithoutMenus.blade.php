@@ -7,6 +7,8 @@
 
         @include('Shared.Partials.GlobalMeta')
 
+        @yield('head')
+
         <!--JS-->
        {!! HTML::script('vendor/jquery/dist/jquery.min.js') !!}
         <!--/JS-->
@@ -14,8 +16,6 @@
         <!--Style-->
        {!!HTML::style('assets/stylesheet/application.css')!!}
         <!--/Style-->
-
-        @yield('head')
 
         <style>
 
@@ -75,7 +75,6 @@
         <div style="text-align: center; color: white" >
         </div>
 
-        @include("Shared.Partials.LangScript")
         {!!HTML::script('assets/javascript/backend.js')!!}
     </body>
     @include('Shared.Partials.GlobalFooterJS')
